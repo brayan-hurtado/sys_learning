@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:background="#F4F7FB">
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+
+        android:layout_height="match_parent"
+
+        android:orientation="vertical"
+
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gestión de Cursos"
+            android:textStyle="bold"
+            android:textSize="26sp"
+            android:textColor="#143C8A"/>
+
+        <EditText
+
+            android:id="@+id/edtBuscarCurso"
+
+            android:layout_width="match_parent"
+
+            android:layout_height="55dp"
+
+            android:layout_marginTop="15dp"
+
+            android:hint="Buscar curso"
+
+            android:background="@drawable/edittext"
+
+            android:drawableStart="@drawable/ic_search"
+
+            android:drawablePadding="10dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+
+            android:id="@+id/rvCursos"
+
+            android:layout_width="match_parent"
+
+            android:layout_height="match_parent"
+
+            android:layout_marginTop="15dp"/>
+
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+
+        android:id="@+id/fabNuevoCurso"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="90dp"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="#143C8A"
+        app:tint="@android:color/white"/>
+
+</RelativeLayout>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.SysLearning" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+
+        <!-- Color principal -->
+        <item name="colorPrimary">#143C8A</item>
+        <item name="colorPrimaryVariant">#0D2E6E</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <!-- Color secundario -->
+        <item name="colorSecondary">#00B8D9</item>
+        <item name="colorSecondaryVariant">#0099B7</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+
+        <!-- Fondo -->
+        <item name="android:statusBarColor">#143C8A</item>
+
+
+    </style>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.SysLearning" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+
+        <item name="colorPrimary">#143C8A</item>
+        <item name="colorPrimaryVariant">#0D2E6E</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <!-- Color secundario -->
+        <item name="colorSecondary">#00B8D9</item>
+        <item name="colorSecondaryVariant">#0099B7</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+
+        <!-- Fondo -->
+        <item name="android:statusBarColor">#143C8A</item>
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+    </style>
+
+
+
+</resources>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="120dp"
+    android:layout_height="128dp"
+
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <!-- Base -->
+
+    <View
+
+        android:id="@+id/viewShadow"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="0dp"
+        android:background="@drawable/node_shadow"/>
+
+    <!-- Botón -->
+
+    <FrameLayout
+
+        android:id="@+id/viewButton"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:layout_gravity="center_horizontal|top"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/node_top">
+
+        <ImageView
+
+            android:id="@+id/imgIcono"
+
+            android:layout_width="68dp"
+
+            android:layout_height="68dp"
+
+            android:layout_gravity="center"
+
+            android:scaleType="fitCenter"/>
+
+    </FrameLayout>
+
+</FrameLayout>

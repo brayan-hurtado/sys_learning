@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.SysLearning" parent="Theme.Material3.DayNight.NoActionBar">
+
+            <item name="colorPrimary">@color/azul_admin</item>
+            <item name="colorOnPrimary">@android:color/white</item>
+            <item name="colorSecondary">@color/azul_admin</item>
+            <item name="colorOnSecondary">@android:color/white</item>
+
+    </style>
+</resources>

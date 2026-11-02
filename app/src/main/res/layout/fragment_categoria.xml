@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fondo_home">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="vertical"
+
+        android:padding="20dp">
+
+        <!-- Nombre categoría -->
+
+        <TextView
+            android:id="@+id/tvCategoria"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Redes"
+
+            android:textColor="@android:color/white"
+
+            android:textSize="30sp"
+
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Selecciona una guía para comenzar."
+
+            android:textColor="#D6E8FF"
+
+            android:textSize="16sp"
+
+            android:layout_marginTop="6dp"
+
+            android:layout_marginBottom="25dp"/>
+
+        <!-- Aquí irán las tarjetas -->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCursos"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="120dp"/>
+
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

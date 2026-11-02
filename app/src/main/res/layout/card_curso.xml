@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginVertical="8dp"
+
+    app:cardCornerRadius="18dp"
+    app:cardElevation="6dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="horizontal"
+
+        android:gravity="center_vertical"
+
+        android:padding="18dp">
+
+        <!-- Imagen del curso -->
+
+        <ImageView
+            android:id="@+id/imgCurso"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_study"
+            android:contentDescription="Imagen del curso"/>
+
+        <!-- Información -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:orientation="vertical"
+
+            android:layout_marginStart="18dp">
+
+            <TextView
+                android:id="@+id/tvTituloCurso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Hardware Básico"
+
+                android:textStyle="bold"
+
+                android:textSize="18sp"
+                android:textColor="@color/tituloCurso"
+                />
+
+            <TextView
+                android:id="@+id/tvDescripcionCurso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_marginTop="6dp"
+
+                android:text="Aprende los componentes principales del computador."
+
+                android:textColor="#666666"
+
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <!-- Flecha -->
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+
+            android:src="@drawable/ic_arrow_right"
+
+            android:color="#42C8F5"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="220dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#143C8A">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imgPerfilAdmin"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:src="@drawable/ic_person"
+        android:padding="10dp"/>
+
+    <TextView
+        android:id="@+id/txtNombreAdmin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Administrador"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_marginTop="15dp"/>
+
+    <TextView
+        android:id="@+id/txtCorreoAdmin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="admin@syslearning.com"
+        android:textColor="#D8E8FF"
+        android:textSize="14sp"/>
+
+</LinearLayout>

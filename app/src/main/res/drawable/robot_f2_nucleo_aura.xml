@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SYS-01 Guardián: aura del núcleo nivel 3 (va detrás del cuerpo). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="260dp"
+    android:height="200dp"
+    android:viewportWidth="260"
+    android:viewportHeight="200">
+    <path
+        android:pathData="M22,104 a118,88 0 1,0 236,0 a118,88 0 1,0 -236,0 Z">
+        <aapt:attr name="android:fillColor">
+          <gradient android:type="radial" android:centerX="140" android:centerY="104" android:gradientRadius="118">
+            <item android:offset="0" android:color="#00E040FB" />
+            <item android:offset="0.65" android:color="#22E040FB" />
+            <item android:offset="0.9" android:color="#55E040FB" />
+            <item android:offset="1" android:color="#00E040FB" />
+          </gradient>
+        </aapt:attr>
+    </path>
+</vector>

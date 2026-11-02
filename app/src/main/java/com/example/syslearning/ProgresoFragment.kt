@@ -8,8 +8,15 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.example.syslearning.game.PalabraDelDiaManager
-import com.example.syslearning.actividades.SesionActividadesManager
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import com.example.syslearning.model.Actividad
+import com.example.syslearning.model.CursoFirestore
+import com.example.syslearning.util.FiltroAula
+import com.example.syslearning.util.LecturaRapida
+import com.example.syslearning.util.Puntuacion
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +34,18 @@ class ProgresoFragment : Fragment() {
     private lateinit var tvCategoriaFavorita: TextView
     private lateinit var tvLogros: TextView
     private lateinit var tvNumeroCursos: TextView
+
+    // Gamificación: actividades, nivel y XP
+    private lateinit var tvActividadesGeneral: TextView
+    private lateinit var tvNumeroActividades: TextView
+    private lateinit var tvDetalleActividades: TextView
+    private lateinit var tvNivel: TextView
+    private lateinit var tvXpTotal: TextView
+    private lateinit var progresoNivel: ProgressBar
+    private lateinit var tvXpSiguienteNivel: TextView
+    private lateinit var tvMiPuesto: TextView
+    private lateinit var tvAlcanceRanking: TextView
+    private lateinit var vistaRaiz: View
 
     // Estadísticas de "La Palabra del Día"
     private lateinit var tvPalabraDiaJugadas: TextView
@@ -60,6 +79,17 @@ class ProgresoFragment : Fragment() {
         tvLogros = view.findViewById(R.id.tvLogros)
         tvNumeroCursos = view.findViewById(R.id.tvNumeroCursos)
 
+        tvActividadesGeneral = view.findViewById(R.id.tvActividadesCompletadasGeneral)
+        tvNumeroActividades = view.findViewById(R.id.tvNumeroActividades)
+        tvDetalleActividades = view.findViewById(R.id.tvDetalleActividades)
+        tvNivel = view.findViewById(R.id.tvNivel)
+        tvXpTotal = view.findViewById(R.id.tvXpTotal)
+        progresoNivel = view.findViewById(R.id.progresoNivel)
+        tvXpSiguienteNivel = view.findViewById(R.id.tvXpSiguienteNivel)
+        tvMiPuesto = view.findViewById(R.id.tvMiPuesto)
+        tvAlcanceRanking = view.findViewById(R.id.tvAlcanceRanking)
+        vistaRaiz = view
+
         tvPalabraDiaJugadas = view.findViewById(R.id.tvPalabraDiaJugadas)
         tvPalabraDiaGanadas = view.findViewById(R.id.tvPalabraDiaGanadas)
         tvPalabraDiaRacha = view.findViewById(R.id.tvPalabraDiaRacha)
@@ -73,10 +103,10 @@ class ProgresoFragment : Fragment() {
         rvRanking.adapter = rankingAdapter
         rvRanking.isNestedScrollingEnabled = false
 
-        cargarProgreso()
-        cargarRanking()
         cargarEstadisticasPalabraDia()
 
+        // cargarProgreso() y cargarRanking() se llaman en onResume, que
+        // también corre al volver de una actividad.
         return view
     }
 
@@ -92,6 +122,7 @@ class ProgresoFragment : Fragment() {
 
         if (::tvLogros.isInitialized) {
             cargarProgreso()
+            cargarRanking()
         }
     }
 
@@ -108,172 +139,273 @@ class ProgresoFragment : Fragment() {
         tvPalabraDiaRachaMax.text = "Mejor racha: ${stats.rachaMaxima} días"
     }
 
+    /**
+     * Progreso general = cursos leídos + actividades dominadas, sobre el
+     * total de cursos y actividades que el estudiante puede ver (globales y
+     * de sus aulas). Se piden en paralelo el usuario, las actividades y los
+     * cursos; sin internet se usan las copias del dispositivo.
+     */
     private fun cargarProgreso() {
 
         val uid = auth.currentUser?.uid ?: return
+        val contexto = context ?: return
 
-        db.collection("usuarios")
-            .document(uid)
-            .get()
-            .addOnSuccessListener { document ->
+        var documentoUsuario: DocumentSnapshot? = null
+        var actividades: List<Actividad>? = null
+        var cursosFirestore: List<CursoFirestore>? = null
 
-                if (!isAdded) return@addOnSuccessListener
+        fun intentarMostrar() {
+            val doc = documentoUsuario ?: return
+            val listaActividades = actividades ?: return
+            val listaCursos = cursosFirestore ?: return
+            if (isAdded) mostrarProgreso(doc, listaActividades, listaCursos)
+        }
 
-                val progreso = document.get("progreso") as? Map<*, *>
+        LecturaRapida.documento(
+            context = contexto,
+            referencia = db.collection("usuarios").document(uid),
+            onDatos = { doc, _ ->
+                documentoUsuario = doc
+                intentarMostrar()
+            },
+            onError = { }
+        )
 
-                val cursosCompletados = progreso?.count {
-
-                    val datos = it.value as? Map<*, *>
-
-                    datos?.get("completado") == true
-
-                } ?: 0
-
-                val logros = mutableListOf<String>()
-
-                if (cursosCompletados >= 1) {
-                    logros.add("🥉 Primer curso completado")
+        LecturaRapida.consulta(
+            context = contexto,
+            query = db.collection("actividades").whereEqualTo("activo", true),
+            refrescar = false,
+            onDatos = { documentos, _ ->
+                actividades = documentos.mapNotNull { doc ->
+                    runCatching {
+                        doc.toObject(Actividad::class.java).apply { id = doc.id }
+                    }.getOrNull()
                 }
+                intentarMostrar()
+            },
+            onError = {
+                actividades = emptyList()
+                intentarMostrar()
+            }
+        )
 
-                if (cursosCompletados >= 5) {
-                    logros.add("🥈 Aprendiz constante")
+        LecturaRapida.consulta(
+            context = contexto,
+            query = db.collection("cursos"),
+            refrescar = false,
+            onDatos = { documentos, _ ->
+                cursosFirestore = documentos.mapNotNull { doc ->
+                    runCatching { doc.toObject(CursoFirestore::class.java) }.getOrNull()
                 }
+                intentarMostrar()
+            },
+            onError = {
+                cursosFirestore = emptyList()
+                intentarMostrar()
+            }
+        )
+    }
 
-                if (cursosCompletados >= 10) {
-                    logros.add("🥇 Estudiante avanzado")
+    private fun mostrarProgreso(
+        document: DocumentSnapshot,
+        todasLasActividades: List<Actividad>,
+        todosLosCursosFirestore: List<CursoFirestore>
+    ) {
+
+        val misAulas = FiltroAula.aulasDe(document)
+
+        // ---- Cursos: los del sistema + los del administrador visibles para su aula ----
+        val titulosCursos = mutableSetOf<String>()
+        Cursos.todosLosCursos.forEach { titulosCursos.add(it.titulo) }
+        todosLosCursosFirestore
+            .filter { FiltroAula.esVisible(it.aulasAsignadas, misAulas) }
+            .forEach { titulosCursos.add(it.titulo) }
+
+        val progreso = document.get("progreso") as? Map<*, *>
+
+        val cursosCompletados = progreso?.count {
+
+            val datos = it.value as? Map<*, *>
+
+            datos?.get("completado") == true && titulosCursos.contains(it.key.toString())
+
+        } ?: 0
+
+        val totalCursos = titulosCursos.size
+
+        // ---- Actividades visibles para su aula ----
+        val actividadesVisibles = todasLasActividades
+            .filter { FiltroAula.esVisible(it.aulasAsignadas, misAulas) }
+        val idsVisibles = actividadesVisibles.map { it.id }.toSet()
+
+        val resumen = Puntuacion.resumirActividades(
+            document.get("actividadesProgreso") as? Map<*, *>
+        )
+
+        val actividadesCompletadas = resumen.idsCompletadas.count { it in idsVisibles }
+        val totalActividades = actividadesVisibles.size
+
+        // ---- Barra de progreso general ----
+        val porcentaje = Puntuacion.porcentajeGeneral(
+            completados = cursosCompletados + actividadesCompletadas,
+            total = totalCursos + totalActividades
+        )
+
+        progresoGeneral.max = 100
+        progresoGeneral.progress = porcentaje
+
+        tvPorcentaje.text = "$porcentaje% completado"
+
+        tvCursosCompletados.text =
+            "📚 $cursosCompletados de $totalCursos cursos completados"
+
+        tvActividadesGeneral.text =
+            "🧩 $actividadesCompletadas de $totalActividades actividades completadas"
+
+        tvNumeroCursos.text = cursosCompletados.toString()
+
+        // ---- Tarjeta de actividades ----
+        tvNumeroActividades.text = actividadesCompletadas.toString()
+        tvDetalleActividades.text = if (resumen.intentos > 0) {
+            "de $totalActividades · ${resumen.intentos} intentos · 🎯 ${resumen.precision} %"
+        } else {
+            "de $totalActividades · aún sin intentos"
+        }
+
+        // ---- Nivel y XP ----
+        val xp = (document.get("xpTotal") as? Number)?.toInt() ?: 0
+        val nivel = Puntuacion.nivel(xp)
+
+        tvNivel.text = "Nivel ${nivel.numero}"
+        tvXpTotal.text = "$xp XP"
+        progresoNivel.max = Puntuacion.XP_POR_NIVEL
+        progresoNivel.progress = nivel.xpEnNivel
+        tvXpSiguienteNivel.text = "${nivel.xpParaSubir} XP para el nivel ${nivel.numero + 1}"
+
+        // ---- Logros ----
+        val logros = mutableListOf<String>()
+
+        if (cursosCompletados >= 1) {
+            logros.add("🥉 Primer curso completado")
+        }
+
+        if (cursosCompletados >= 5) {
+            logros.add("🥈 Aprendiz constante")
+        }
+
+        if (cursosCompletados >= 10) {
+            logros.add("🥇 Estudiante avanzado")
+        }
+
+        if (totalCursos > 0 && cursosCompletados == totalCursos) {
+            logros.add("🏆 Experto SysLearning")
+        }
+
+        // Logros de racha en "La Palabra del Día" (racha MÁXIMA:
+        // una vez desbloqueados quedan para siempre).
+        val statsPalabraDelDia = PalabraDelDiaManager.obtenerEstadisticas(requireContext())
+
+        if (statsPalabraDelDia.rachaMaxima >= 3) {
+            logros.add("🔥 Racha de 3 días en La Palabra del Día")
+        }
+
+        if (statsPalabraDelDia.rachaMaxima >= 10) {
+            logros.add("🔥🔥 Racha de 10 días en La Palabra del Día")
+        }
+
+        if (statsPalabraDelDia.rachaMaxima >= 30) {
+            logros.add("🔥🔥🔥 Racha de 30 días en La Palabra del Día")
+        }
+
+        // Insignias de micro actividades: se leen de Firestore (no del
+        // celular), así se conservan aunque cambie de dispositivo.
+        if (resumen.completadas >= 1) {
+            logros.add("📘 Primera actividad completada")
+        }
+
+        if (resumen.completadas >= 5) {
+            logros.add("📗 5 actividades completadas")
+        }
+
+        if (resumen.completadas >= 10) {
+            logros.add("📕 10 actividades completadas")
+        }
+
+        if (resumen.intentos >= 5 && resumen.precision >= 80) {
+            logros.add("🎯 Precisión del 80 % o más")
+        }
+
+        if (totalActividades > 0 && actividadesCompletadas == totalActividades) {
+            logros.add("🧠 Todas las actividades dominadas")
+        }
+
+        if (nivel.numero >= 2) {
+            logros.add("⭐ Nivel ${nivel.numero} alcanzado")
+        }
+
+        var ultimoCurso = "Ninguno"
+        var ultimaFecha: Timestamp? = null
+
+        var ofimatica = 0
+        var redes = 0
+        var seguridad = 0
+        var programacion = 0
+
+        progreso?.forEach { entrada ->
+
+            val datos = entrada.value as? Map<*, *> ?: return@forEach
+
+            val fecha = datos["fecha"] as? Timestamp
+
+            if (fecha != null) {
+
+                if (ultimaFecha == null || fecha.seconds > ultimaFecha!!.seconds) {
+                    ultimaFecha = fecha
+                    ultimoCurso = entrada.key.toString()
                 }
-
-                if (cursosCompletados == Cursos.todosLosCursos.size) {
-                    logros.add("🏆 Experto SysLearning")
-                }
-
-                // ------------------------------------------------------
-                // Logros de racha en "La Palabra del Día".
-                //
-                // Se basan en la racha MÁXIMA (no la actual), así que
-                // una vez desbloqueados quedan para siempre, aunque
-                // después el usuario pierda la racha por no jugar un día.
-                // ------------------------------------------------------
-
-                val statsPalabraDelDia = PalabraDelDiaManager.obtenerEstadisticas(requireContext())
-
-                if (statsPalabraDelDia.rachaMaxima >= 3) {
-                    logros.add("🔥 Racha de 3 días en La Palabra del Día")
-                }
-
-                if (statsPalabraDelDia.rachaMaxima >= 10) {
-                    logros.add("🔥🔥 Racha de 10 días en La Palabra del Día")
-                }
-
-                if (statsPalabraDelDia.rachaMaxima >= 30) {
-                    logros.add("🔥🔥🔥 Racha de 30 días en La Palabra del Día")
-                }
-
-                // ------------------------------------------------------
-                // Insignias por actividades (sesiones de preguntas)
-                // completadas. Se basan en el total acumulado, así que
-                // también quedan para siempre una vez desbloqueadas.
-                // ------------------------------------------------------
-
-                val statsActividades =com.example.syslearning.actividades.SesionActividadesManager
-                        .obtenerEstadisticas(requireContext())
-
-                if (statsActividades.totalCompletadas >= 1) {
-                    logros.add("📘 Primera actividad completada")
-                }
-
-                if (statsActividades.totalCompletadas >= 5) {
-                    logros.add("📗 5 actividades completadas")
-                }
-
-                if (statsActividades.totalCompletadas >= 10) {
-                    logros.add("📕 10 actividades completadas")
-                }
-
-                val totalCursos = Cursos.todosLosCursos.size
-
-                val porcentaje =
-                    if (totalCursos > 0)
-                        (cursosCompletados * 100) / totalCursos
-                    else
-                        0
-
-                progresoGeneral.max = 100
-                progresoGeneral.progress = porcentaje
-
-                tvPorcentaje.text = "$porcentaje% completado"
-
-                tvCursosCompletados.text =
-                    "$cursosCompletados de $totalCursos cursos completados"
-
-                tvNumeroCursos.text = cursosCompletados.toString()
-
-                var ultimoCurso = "Ninguno"
-                var ultimaFecha: Timestamp? = null
-
-                var ofimatica = 0
-                var redes = 0
-                var seguridad = 0
-                var programacion = 0
-
-                progreso?.forEach { entrada ->
-
-                    val datos = entrada.value as? Map<*, *> ?: return@forEach
-
-                    val fecha = datos["fecha"] as? Timestamp
-
-                    if (fecha != null) {
-
-                        if (ultimaFecha == null || fecha.seconds > ultimaFecha!!.seconds) {
-                            ultimaFecha = fecha
-                            ultimoCurso = entrada.key.toString()
-                        }
-                    }
-
-                    if (datos["completado"] == true) {
-
-                        val nombreCurso = entrada.key.toString()
-
-                        when {
-
-                            Cursos.listaOfimatica.any { it.titulo == nombreCurso } ->
-                                ofimatica++
-
-                            Cursos.listaRedes.any { it.titulo == nombreCurso } ->
-                                redes++
-
-                            Cursos.listaSeguridad.any { it.titulo == nombreCurso } ->
-                                seguridad++
-
-                            Cursos.listaProgramacion.any { it.titulo == nombreCurso } ->
-                                programacion++
-                        }
-                    }
-                }
-
-                val categoriaFavorita = if (
-                    ofimatica == 0 &&
-                    redes == 0 &&
-                    seguridad == 0 &&
-                    programacion == 0
-                ) {
-                    "Sin información"
-                } else {
-
-                    when (maxOf(ofimatica, redes, seguridad, programacion)) {
-                        ofimatica -> "📄 Ofimática"
-                        redes -> "🌐 Redes"
-                        seguridad -> "🛡 Seguridad"
-                        else -> "💻 Programación"
-                    }
-                }
-
-                tvUltimoCurso.text = "📚 : $ultimoCurso"
-                tvCategoriaFavorita.text = "Categoría favorita: $categoriaFavorita"
-                tvLogros.text = if (logros.isEmpty()) "Ninguno" else logros.joinToString("\n")
             }
 
+            if (datos["completado"] == true) {
 
+                val nombreCurso = entrada.key.toString()
+
+                when {
+
+                    Cursos.listaOfimatica.any { it.titulo == nombreCurso } ->
+                        ofimatica++
+
+                    Cursos.listaRedes.any { it.titulo == nombreCurso } ->
+                        redes++
+
+                    Cursos.listaSeguridad.any { it.titulo == nombreCurso } ->
+                        seguridad++
+
+                    Cursos.listaProgramacion.any { it.titulo == nombreCurso } ->
+                        programacion++
+                }
+            }
+        }
+
+        val categoriaFavorita = if (
+            ofimatica == 0 &&
+            redes == 0 &&
+            seguridad == 0 &&
+            programacion == 0
+        ) {
+            "Sin información"
+        } else {
+
+            when (maxOf(ofimatica, redes, seguridad, programacion)) {
+                ofimatica -> "📄 Ofimática"
+                redes -> "🌐 Redes"
+                seguridad -> "🛡 Seguridad"
+                else -> "💻 Programación"
+            }
+        }
+
+        tvUltimoCurso.text = "📚 : $ultimoCurso"
+        tvCategoriaFavorita.text = "Categoría favorita: $categoriaFavorita"
+        tvLogros.text = if (logros.isEmpty()) "Ninguno" else logros.joinToString("\n")
     }
 
     /**
@@ -294,12 +426,14 @@ class ProgresoFragment : Fragment() {
             return
         }
 
-        db.collection("usuarios")
-            .document(uid)
-            .get()
-            .addOnSuccessListener { documento ->
+        val contexto = context ?: return
 
-                if (!isAdded) return@addOnSuccessListener
+        LecturaRapida.documento(
+            context = contexto,
+            referencia = db.collection("usuarios").document(uid),
+            onDatos = { documento, _ ->
+
+                if (!isAdded) return@documento
 
                 val misAulas = (documento.get("aulas") as? List<*>)
                     ?.mapNotNull { it as? String }
@@ -310,15 +444,16 @@ class ProgresoFragment : Fragment() {
                 } else {
                     cargarRankingConFiltro(codigoAula = null, soloSinAula = true)
                 }
-            }
-            .addOnFailureListener {
+            },
+            onError = {
 
-                if (!isAdded) return@addOnFailureListener
+                if (!isAdded) return@documento
 
                 // Si no se pudo leer el propio documento, se muestra
                 // al menos el grupo de "sin aula" en vez de fallar del todo.
                 cargarRankingConFiltro(codigoAula = null, soloSinAula = true)
             }
+        )
     }
 
     private fun cargarRankingConFiltro(codigoAula: String?, soloSinAula: Boolean) {
@@ -331,11 +466,40 @@ class ProgresoFragment : Fragment() {
 
             soloSinAula = soloSinAula,
 
+            context = context,
+
             onSuccess = { ranking ->
 
                 if (!isAdded) return@obtenerRanking
 
-                rankingAdapter.actualizarLista(ranking)
+                val uidActual = auth.currentUser?.uid
+
+                // Los 3 primeros van en el podio; el resto, en la lista.
+                val enPodio = PodioRanking.mostrar(vistaRaiz, ranking, uidActual)
+                rankingAdapter.actualizarLista(
+                    ranking.drop(enPodio),
+                    posicionInicial = enPodio + 1,
+                    uidActual = uidActual
+                )
+
+                // Puesto del usuario actual, en una etiqueta del encabezado.
+                val miPuesto = ranking.indexOfFirst { it.uid == uidActual } + 1
+                if (miPuesto > 0) {
+                    tvMiPuesto.text = "Tu puesto: #$miPuesto"
+                    tvMiPuesto.background = GradientDrawable().apply {
+                        cornerRadius = 40f
+                        setColor(Color.parseColor("#FFD54F"))
+                    }
+                    tvMiPuesto.visibility = View.VISIBLE
+                } else {
+                    tvMiPuesto.visibility = View.GONE
+                }
+
+                tvAlcanceRanking.text = if (codigoAula != null) {
+                    "Compañeros de tu aula"
+                } else {
+                    "Estudiantes sin aula asignada"
+                }
 
                 tvSinRanking.text = if (codigoAula != null) {
                     "Ningún compañero de tu aula tiene datos todavía."

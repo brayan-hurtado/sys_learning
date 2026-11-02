@@ -53,19 +53,18 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="Módulo (1 a 5)">
+            android:text="Módulo al que pertenece"
+            android:textColor="@color/sys_text_secondary"
+            android:textSize="12sp" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etModuloActividad"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
+        <Spinner
+            android:id="@+id/spModuloActividad"
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
 
         <TextView
             android:layout_width="match_parent"
@@ -191,6 +190,65 @@
                 android:gravity="top"
                 android:inputType="textMultiLine"
                 android:minLines="3" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Pantalla de teoría"
+            android:textColor="@color/tituloCurso"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imgPortadaActividad"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="Imagen de portada"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_programacion" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnElegirImagenActividad"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Elegir imagen de portada (opcional)"
+            android:textAllCaps="false" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="🧠 ¿Sabías que? (opcional)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etSabiasQueActividad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:minLines="2" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="⚠ Consejo (opcional)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etConsejoActividad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:minLines="2" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

@@ -48,7 +48,9 @@ class EstadisticasAdminFragment : Fragment(R.layout.fragment_estadisticas_admin)
 
                 if (!isAdded) return@obtenerRanking
 
-                rankingAdapter.actualizarLista(ranking)
+                // Los 3 primeros van en el podio; el resto, en la lista.
+                val enPodio = PodioRanking.mostrar(requireView(), ranking, uidActual = null)
+                rankingAdapter.actualizarLista(ranking.drop(enPodio), posicionInicial = enPodio + 1)
 
                 tvSinRanking.text = if (codigoAula != null) {
                     "Ningún estudiante de esta aula tiene datos todavía."

@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.syslearning.model.CursoFirestore
+import com.example.syslearning.util.FiltroAula
 import com.google.firebase.firestore.FirebaseFirestore
 import com.bumptech.glide.Glide
 
@@ -100,10 +101,18 @@ class   CategoriaFragment : Fragment() {
 
             .addOnSuccessListener { documents ->
 
+                // Los cursos de un aula solo los ven los estudiantes de esa aula;
+                // los globales (sin aula asignada) los ven todos.
+                FiltroAula.obtenerMisAulas { misAulas ->
+
+                if (!isAdded) return@obtenerMisAulas
+
                 for (doc in documents) {
 
                     val cursoFirestore =
                         doc.toObject(CursoFirestore::class.java)
+
+                    if (!FiltroAula.esVisible(cursoFirestore.aulasAsignadas, misAulas)) continue
 
                     listaCursos.add(
 
@@ -130,6 +139,8 @@ class   CategoriaFragment : Fragment() {
                 }
 
                 adapter.notifyDataSetChanged()
+
+                }
 
             }
 

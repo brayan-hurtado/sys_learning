@@ -38,6 +38,8 @@ object ContenidoEjemplo {
         val concepto: String,
         val ejemploCodigo: String,
         val ejemploExplicacion: String,
+        val sabiasQue: String,
+        val consejo: String,
         val ejercicios: List<EjercicioSemilla>
     )
 
@@ -66,6 +68,10 @@ object ContenidoEjemplo {
                     "2. Lee el segundo y lo guarda en b.\n" +
                     "3. Suma a y b, y guarda el resultado en suma.\n" +
                     "4. Muestra suma. Si a = 4 y b = 3, escribe 7.",
+            sabiasQue = "La palabra «algoritmo» viene de al-Juarismi, un matemático persa " +
+                    "del siglo IX que escribió procedimientos paso a paso para hacer cálculos.",
+            consejo = "Antes de programar, escribe los pasos en español. Si otra persona puede " +
+                    "seguirlos sin preguntarte nada, tu algoritmo es preciso.",
             ejercicios = listOf(
                 EjercicioSemilla(
                     paso = PasoEjercicio.PRACTICA,
@@ -141,6 +147,10 @@ object ContenidoEjemplo {
                     "Vuelta 2: lee 3 y suma = 7.\n" +
                     "Vuelta 3: lee 5 y suma = 12.\n" +
                     "Cuando i pasa de 3, el ciclo termina y se escribe 12.",
+            sabiasQue = "Casi todos los videojuegos tienen un ciclo principal que se repite " +
+                    "decenas de veces por segundo para leer los controles y dibujar cada imagen.",
+            consejo = "Antes de escribir un ciclo, pregúntate qué hace que termine. Si no " +
+                    "encuentras la respuesta, tienes un ciclo infinito.",
             ejercicios = listOf(
                 EjercicioSemilla(
                     paso = PasoEjercicio.PRACTICA,
@@ -227,12 +237,20 @@ object ContenidoEjemplo {
                 val existentes = documentos.mapNotNull { it.getString("titulo") }.toSet()
                 val nuevas = actividades.filter { it.titulo !in existentes }
 
-                if (nuevas.isEmpty()) {
-                    onTerminar(0)
-                    return@addOnSuccessListener
-                }
-
                 val batch = db.batch()
+
+                // Actividades de ejemplo cargadas antes de existir "¿Sabías que?"
+                // y "Consejo": se completan sin tocar lo demás.
+                documentos.forEach { doc ->
+                    val semilla = actividades.firstOrNull { it.titulo == doc.getString("titulo") }
+                        ?: return@forEach
+                    if (doc.getString("sabiasQue").isNullOrBlank() && doc.getString("consejo").isNullOrBlank()) {
+                        batch.update(
+                            doc.reference,
+                            mapOf("sabiasQue" to semilla.sabiasQue, "consejo" to semilla.consejo)
+                        )
+                    }
+                }
 
                 nuevas.forEach { semilla ->
 
@@ -253,7 +271,10 @@ object ContenidoEjemplo {
                             "reto" to semilla.reto,
                             "concepto" to semilla.concepto,
                             "ejemploCodigo" to semilla.ejemploCodigo,
-                            "ejemploExplicacion" to semilla.ejemploExplicacion
+                            "ejemploExplicacion" to semilla.ejemploExplicacion,
+                            "imagen" to "",
+                            "sabiasQue" to semilla.sabiasQue,
+                            "consejo" to semilla.consejo
                         )
                     )
 

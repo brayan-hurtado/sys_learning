@@ -1,6 +1,9 @@
 package com.example.syslearning
 
 import android.os.Bundle
+import com.example.syslearning.juego.Gamificacion
+import com.example.syslearning.juego.RobotVisual
+import com.example.syslearning.juego.SysRobotFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -267,6 +270,26 @@ class HomeFragment : Fragment() {
             ).show()
 
         }
+
+        // Minijuego SYS ROBOT: muestra el saldo de monedas en la tarjeta.
+        view.findViewById<CardView>(R.id.cardSysRobot).setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.frameContainer, SysRobotFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        Gamificacion.leer(
+            requireContext(),
+            onEstado = { estado ->
+                if (!isAdded) return@leer
+                view.findViewById<ImageView>(R.id.imgSysRobotHome)
+                    .setImageDrawable(RobotVisual.imagen(requireContext(), estado.niveles))
+                view.findViewById<TextView>(R.id.tvEstadoSysRobot).text =
+                    "🪙 ${estado.monedas} monedas · vence virus con lo que aprendes"
+            },
+            onError = { }
+        )
 
         cardPalabraDia.setOnClickListener {
 

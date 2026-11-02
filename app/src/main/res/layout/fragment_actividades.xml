@@ -54,7 +54,7 @@
 
     </LinearLayout>
 
-    <!-- Cuadrícula de actividades (estilo bento) -->
+    <!-- Lista de módulos (ModuloAdapter) -->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvActividades"
@@ -63,9 +63,7 @@
         android:layout_weight="1"
         android:background="@android:color/transparent"
         android:clipToPadding="false"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="90dp" />
+        android:paddingTop="4dp"
+        android:paddingBottom="110dp" />
 
 </LinearLayout>

@@ -18,11 +18,20 @@ import com.google.android.material.card.MaterialCardView
 
 class ActividadAdapter(
 
-    private val lista: List<Actividad>,
+    lista: List<Actividad>,
 
     private val onClick: (Actividad) -> Unit
 
 ) : RecyclerView.Adapter<ActividadAdapter.ViewHolder>() {
+
+    private val lista = lista.toMutableList()
+
+    /** Reemplaza las actividades sin crear un adapter nuevo. */
+    fun actualizar(nuevas: List<Actividad>) {
+        lista.clear()
+        lista.addAll(nuevas)
+        notifyDataSetChanged()
+    }
 
     // Paleta que van rotando las tarjetas DISPONIBLES, para que la
     // cuadrícula no se vea monocroma si hay varias a la vez.
@@ -113,10 +122,29 @@ class ActividadAdapter(
             }
         }
 
+        // El reto final del módulo se distingue en dorado.
+        if (NivelActividad.desde(actividad.nivel) == NivelActividad.INTEGRACION) {
+            when (actividad.estado) {
+                EstadoActividad.DISPONIBLE -> {
+                    holder.card.setCardBackgroundColor(Color.parseColor("#F5B700"))
+                    holder.tvSubtitulo.text = "🏆 Reto final"
+                }
+                EstadoActividad.COMPLETADA -> holder.tvSubtitulo.text = "🏆 Reto superado"
+                EstadoActividad.BLOQUEADA -> holder.tvSubtitulo.text = "🔒 Reto final"
+            }
+        }
+
         holder.card.setOnClickListener {
 
             if (actividad.estado != EstadoActividad.BLOQUEADA) {
                 onClick(actividad)
+            } else {
+                val mensaje = if (NivelActividad.desde(actividad.nivel) == NivelActividad.INTEGRACION) {
+                    "🔒 Completa las demás actividades del módulo para abrir el reto final"
+                } else {
+                    "🔒 Completa la actividad anterior para desbloquear esta"
+                }
+                android.widget.Toast.makeText(holder.card.context, mensaje, android.widget.Toast.LENGTH_SHORT).show()
             }
         }
     }

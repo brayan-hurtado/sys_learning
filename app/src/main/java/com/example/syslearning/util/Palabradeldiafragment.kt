@@ -19,6 +19,8 @@ import com.example.syslearning.R
 import com.example.syslearning.game.EstadoJuego
 import com.example.syslearning.game.Diccionario
 import com.example.syslearning.game.PalabraDelDiaManager
+import com.example.syslearning.juego.Gamificacion
+import com.example.syslearning.juego.ReglasGamificacion
 
 class PalabraDelDiaFragment : Fragment(R.layout.fragment_palabra_dia) {
 
@@ -390,15 +392,30 @@ class PalabraDelDiaFragment : Fragment(R.layout.fragment_palabra_dia) {
         )
 
         deshabilitarTeclado()
-        mostrarDialogoFinal(gano)
+
+        // Monedas (🪙 SYS ROBOT) y XP por adivinar la palabra, una vez por día.
+        Gamificacion.registrarPalabraDelDia(
+            context = requireContext(),
+            gano = gano,
+            intentos = estado.intentos.size
+        ) { recompensa ->
+            if (!isAdded) return@registrarPalabraDelDia
+            mostrarDialogoFinal(gano, recompensa)
+        }
     }
 
-    private fun mostrarDialogoFinal(gano: Boolean) {
+    private fun mostrarDialogoFinal(gano: Boolean, recompensa: ReglasGamificacion.RecompensaPalabra) {
+        val premio = if (recompensa.monedas > 0 || recompensa.xp > 0) {
+            "\n\n🪙 +${recompensa.monedas} monedas\n⭐ +${recompensa.xp} XP"
+        } else {
+            ""
+        }
+
         val mensaje = if (gano) {
             "🎉 ¡Correcto!\n\nHas descubierto la palabra del día.\n\n" +
-                    "Intentos utilizados: ${estado.intentos.size} de 6"
+                    "Intentos utilizados: ${estado.intentos.size} de 6" + premio
         } else {
-            "Has perdido, intenta nuevamente mañana"
+            "Has perdido, intenta nuevamente mañana.\n\nAdivina la palabra para ganar 50 monedas y XP."
         }
 
         AlertDialog.Builder(requireContext())

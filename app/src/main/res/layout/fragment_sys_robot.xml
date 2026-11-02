@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sección SYS ROBOT: saldo, materiales, SYS-01, mejoras y virus (SysRobotFragment). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_juego"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ScrollView
+        android:id="@+id/scrollSysRobot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Encabezado -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/btnVolverSysRobot"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:contentDescription="Volver"
+                    android:gravity="center"
+                    android:text="‹"
+                    android:textColor="@android:color/white"
+                    android:textSize="30sp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/bungee"
+                        android:text="SYS ROBOT"
+                        android:textColor="#22E5FF"
+                        android:textSize="22sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Defiende el mundo digital de los virus"
+                        android:textColor="#B8C4D9"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvMonedasSysRobot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_juego_chip"
+                    android:paddingStart="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="6dp"
+                    android:text="🪙 0"
+                    android:textColor="#FFD54F"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Materiales -->
+            <LinearLayout
+                android:id="@+id/contenedorMateriales"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal" />
+
+            <TextView
+                android:id="@+id/tvAvisoSysRobot"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="#33FFB300"
+                android:padding="8dp"
+                android:textColor="#FFE082"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <!-- SYS-01 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_juego_tarjeta"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/imgRobot"
+                    android:layout_width="220dp"
+                    android:layout_height="180dp"
+                    android:contentDescription="SYS-01, el perro robot"
+                    android:src="@drawable/robot_sys01" />
+
+                <TextView
+                    android:id="@+id/tvNombreRobot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/bungee"
+                    android:text="SYS-01"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/tvNivelRobot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Mejoras 0 de 12"
+                    android:textColor="#22E5FF"
+                    android:textSize="13sp" />
+
+                <!-- Vida, ataque, defensa, energía, velocidad -->
+                <LinearLayout
+                    android:id="@+id/contenedorAtributos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal" />
+
+                <TextView
+                    android:id="@+id/tvRachaSysRobot"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:textColor="#FFB74D"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <!-- Mejoras -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Mejoras de SYS-01"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/contenedorMejoras"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Virus -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Virus detectados"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/contenedorEnemigos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Cómo ganar monedas -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/bg_juego_tarjeta"
+                android:lineSpacingExtra="3dp"
+                android:padding="14dp"
+                android:text="🪙 ¿Cómo ganar monedas?\n• Dominar una actividad: 50 (1 intento) o 35 (2 intentos)\n• Terminarla sin dominarla: 10, una sola vez\n• Repetir una actividad ya dominada: 0\n• Adivinar la Palabra del Día: 50 (una vez por día) + XP\n• Racha diaria: de 10 a 40 por día\n• Racha de 3, 7, 14 y 30 días: 50, 120, 250 y 500 (una vez por racha)\n• Vencer un virus por primera vez: 30, 70 o 150 + materiales\n• Victorias repetidas: recompensa reducida, máximo 3 por día\n\n🦠 Cada vez que vences a un virus sube de nivel: +20 % de vida y +15 % de ataque en la revancha (hasta el nivel 10)."
+                android:textColor="#B8C4D9"
+                android:textSize="12sp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</FrameLayout>

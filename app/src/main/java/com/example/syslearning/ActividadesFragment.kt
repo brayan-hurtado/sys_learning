@@ -7,29 +7,27 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.example.syslearning.actividades.MicroActividadFragment
-import com.example.syslearning.model.Actividad
-import com.example.syslearning.model.ActividadAdapter
-import com.example.syslearning.model.EstadoActividad
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.syslearning.actividades.ModuloActividadesFragment
+import com.example.syslearning.actividades.ModulosRepository
+import com.example.syslearning.actividades.ProgresoModulos.EstadoModulo
+import com.example.syslearning.model.ModuloAdapter
+import com.example.syslearning.util.LecturaRapida
 
 /**
- * Pantalla de actividades del estudiante. Carga las actividades desde
- * Firestore (colección "actividades") y calcula el estado de cada una
- * (DISPONIBLE / BLOQUEADA / COMPLETADA) según el progreso guardado del
- * usuario actual, en vez de venir fijo desde el documento.
+ * Pantalla de actividades del estudiante, organizada por módulos.
+ * Cada módulo muestra su barra de avance y el estado de su reto final;
+ * al tocarlo se abren sus actividades (ModuloActividadesFragment).
+ *
+ * Las reglas de desbloqueo están en ProgresoModulos.
  */
 class ActividadesFragment : Fragment(R.layout.fragment_actividades) {
 
     private lateinit var recycler: RecyclerView
     private lateinit var txtProgreso: TextView
     private lateinit var progresoGeneral: ProgressBar
-
-    private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
+    private lateinit var adapter: ModuloAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
@@ -39,143 +37,80 @@ class ActividadesFragment : Fragment(R.layout.fragment_actividades) {
         txtProgreso = view.findViewById(R.id.txtProgreso)
         progresoGeneral = view.findViewById(R.id.progresoGeneral)
 
-        recycler.layoutManager =
-            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        recycler.layoutManager = LinearLayoutManager(requireContext())
 
-        cargarActividades()
+        // Al volver con "atrás" la lista empieza arriba.
+        recycler.isSaveEnabled = false
+
+        adapter = ModuloAdapter { estado -> abrirModulo(estado) }
+        recycler.adapter = adapter
+
+        cargar()
     }
 
-    private fun cargarActividades() {
+    private fun cargar() {
 
-        // NOTA: esta consulta combina un whereEqualTo + orderBy en campos
-        // distintos. La primera vez que corras esto, Firestore puede
-        // pedirte crear un índice compuesto (te da un link en el error
-        // de Logcat) — solo hay que hacer clic en ese link una vez.
-        db.collection("actividades")
-            .whereEqualTo("activo", true)
-            .orderBy("orden")
-            .get()
-            .addOnSuccessListener { documentos ->
+        txtProgreso.text = "Cargando…"
 
-                if (!isAdded) return@addOnSuccessListener
+        ModulosRepository.cargarAvance(
+            requireContext(),
+            onAvance = { avance ->
 
-                val actividades = documentos.mapNotNull { doc ->
-                    doc.toObject(Actividad::class.java).apply { id = doc.id }
+                if (!isAdded) return@cargarAvance
+
+                if (avance.modulos.isEmpty()) {
+                    txtProgreso.text = if (avance.desdeCache) {
+                        "Sin conexión: conéctate una vez para descargar las actividades"
+                    } else {
+                        "Todavía no hay actividades"
+                    }
+                    adapter.actualizar(emptyList())
+                    return@cargarAvance
                 }
 
-                aplicarProgresoDelUsuario(actividades)
-            }
-            .addOnFailureListener { e ->
+                adapter.actualizar(avance.modulos)
+                recycler.scrollToPosition(0)
 
-                if (!isAdded) return@addOnFailureListener
+                val porcentaje = if (avance.total > 0) avance.completadas * 100 / avance.total else 0
+                progresoGeneral.max = 100
+                progresoGeneral.progress = porcentaje
+
+                val modulosCompletos = avance.modulos.count { it.completado }
+                txtProgreso.text =
+                    "$porcentaje% completado · $modulosCompletos de ${avance.modulos.size} módulos"
+
+                if (!avance.desdeCache && LecturaRapida.hayConexion(requireContext())) {
+                    ModulosRepository.descargarParaUsoSinConexion(
+                        requireContext(),
+                        avance.modulos.flatMap { it.todas }
+                    )
+                }
+            },
+            onError = { e ->
+
+                if (!isAdded) return@cargarAvance
 
                 Log.e("ACTIVIDADES", "Error al cargar actividades", e)
-
-                txtProgreso.text = e.localizedMessage
-
-                Toast.makeText(
-                    requireContext(),
-                    e.localizedMessage,
-                    Toast.LENGTH_LONG
-                ).show()
+                txtProgreso.text = "No se pudieron cargar las actividades"
+                Toast.makeText(requireContext(), e.localizedMessage, Toast.LENGTH_LONG).show()
             }
+        )
     }
 
-    /**
-     * Marca cada actividad como COMPLETADA / DISPONIBLE / BLOQUEADA según
-     * el progreso guardado del usuario en
-     * usuarios/{uid}.actividadesProgreso (lo escribe SesionActividadesManager
-     * al terminar una sesión). La primera actividad sin completar queda
-     * como la disponible; las siguientes quedan bloqueadas.
-     */
-    private fun aplicarProgresoDelUsuario(actividades: List<Actividad>) {
+    private fun abrirModulo(estado: EstadoModulo) {
 
-        val uid = auth.currentUser?.uid
-
-        if (uid == null) {
-            mostrarActividades(marcarEstados(actividades, emptySet()))
+        if (!estado.desbloqueado) {
+            Toast.makeText(
+                requireContext(),
+                "🔒 Supera el reto final del módulo anterior para desbloquear este módulo",
+                Toast.LENGTH_LONG
+            ).show()
             return
         }
 
-        db.collection("usuarios")
-            .document(uid)
-            .get()
-            .addOnSuccessListener { documento ->
-
-                if (!isAdded) return@addOnSuccessListener
-
-                val progreso = documento.get("actividadesProgreso") as? Map<*, *>
-
-                val idsCompletadas = progreso
-                    ?.filterValues { valor -> (valor as? Map<*, *>)?.get("completado") == true }
-                    ?.keys
-                    ?.mapNotNull { it as? String }
-                    ?.toSet()
-                    ?: emptySet()
-
-                mostrarActividades(marcarEstados(actividades, idsCompletadas))
-            }
-            .addOnFailureListener {
-
-                if (!isAdded) return@addOnFailureListener
-
-                mostrarActividades(marcarEstados(actividades, emptySet()))
-            }
-    }
-
-    private fun marcarEstados(
-        actividades: List<Actividad>,
-        idsCompletadas: Set<String>
-    ): List<Actividad> {
-
-        var yaHayDisponible = false
-
-        actividades.forEach { actividad ->
-
-            when {
-                idsCompletadas.contains(actividad.id) -> {
-                    actividad.estado = EstadoActividad.COMPLETADA
-                }
-                !yaHayDisponible -> {
-                    actividad.estado = EstadoActividad.DISPONIBLE
-                    yaHayDisponible = true
-                }
-                else -> {
-                    actividad.estado = EstadoActividad.BLOQUEADA
-                }
-            }
-        }
-
-        return actividades
-    }
-
-    private fun mostrarActividades(actividades: List<Actividad>) {
-
-        recycler.adapter = ActividadAdapter(actividades) { actividad ->
-
-            // Micro actividad de 7 pasos (reto, concepto, ejemplo, práctica,
-            // retroalimentación, comprobación y recompensa).
-            val fragment = MicroActividadFragment.newInstance(actividad.id)
-
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.frameContainer, fragment)
-                .addToBackStack(null)
-                .commit()
-
-        }
-
-        actualizarProgresoEncabezado(actividades)
-    }
-
-    private fun actualizarProgresoEncabezado(actividades: List<Actividad>) {
-
-        val completadas = actividades.count { it.estado == EstadoActividad.COMPLETADA }
-        val total = actividades.size
-
-        val porcentaje = if (total > 0) (completadas * 100) / total else 0
-
-        progresoGeneral.max = 100
-        progresoGeneral.progress = porcentaje
-        txtProgreso.text = "$porcentaje% completado"
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.frameContainer, ModuloActividadesFragment.newInstance(estado.modulo.numero))
+            .addToBackStack(null)
+            .commit()
     }
 }

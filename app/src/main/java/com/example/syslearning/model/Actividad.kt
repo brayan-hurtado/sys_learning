@@ -55,7 +55,25 @@ data class Actividad(
     var ejemploCodigo: String = "",
 
     /** Paso 3: qué pasa al ejecutar el ejemplo, paso a paso. */
-    var ejemploExplicacion: String = ""
+    var ejemploExplicacion: String = "",
+
+    // ---- Pantalla de teoría (mismo diseño que fragment_contenido) ----
+
+    /** URL de la imagen de portada (Firebase Storage). Vacío = imagen por defecto. */
+    var imagen: String = "",
+
+    /** Tarjeta "¿Sabías que?" (opcional). */
+    var sabiasQue: String = "",
+
+    /** Tarjeta "Consejo" (opcional). */
+    var consejo: String = "",
+
+    /**
+     * Códigos de las aulas a las que pertenece (ej. "SYS-SMQM9"), igual que
+     * en CursoFirestore. Lista vacía = actividad GLOBAL, visible para todos.
+     * Las actividades creadas antes de este campo se leen como globales.
+     */
+    var aulasAsignadas: List<String> = emptyList()
 
 )
 
@@ -63,7 +81,7 @@ enum class NivelActividad(val etiqueta: String) {
 
     RECONOCIMIENTO("Reconocimiento"),
     APLICACION("Aplicación"),
-    INTEGRACION("Integración (reto)");
+    INTEGRACION("🏆 Reto final del módulo (integración)");
 
     companion object {
         fun desde(valor: String?): NivelActividad =

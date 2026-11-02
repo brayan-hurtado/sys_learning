@@ -20,9 +20,15 @@ import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.widget.CheckBox
+import androidx.core.content.ContextCompat
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import android.widget.ScrollView
-import androidx.appcompat.app.AlertDialog
+import android.app.Dialog
+import android.view.Window
 import androidx.core.text.HtmlCompat
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.Timestamp
@@ -162,52 +168,99 @@ class registro : AppCompatActivity() {
         val vista = layoutInflater.inflate(R.layout.dialog_terminos, null)
 
         val scroll = vista.findViewById<ScrollView>(R.id.scrollTerminos)
+        val progreso = vista.findViewById<LinearProgressIndicator>(R.id.progresoLectura)
         val tvTexto = vista.findViewById<TextView>(R.id.tvTextoTerminos)
         val tvAviso = vista.findViewById<TextView>(R.id.tvAvisoLectura)
-        val cbTerminos = vista.findViewById<CheckBox>(R.id.cbAceptoTerminos)
-        val cbDatos = vista.findViewById<CheckBox>(R.id.cbAutorizoDatos)
-        val cbRepresentante = vista.findViewById<CheckBox>(R.id.cbAutorizacionRepresentante)
         val btnRechazar = vista.findViewById<MaterialButton>(R.id.btnRechazarTerminos)
         val btnAceptar = vista.findViewById<MaterialButton>(R.id.btnAceptarTerminos)
+
+        // Cada casilla va dentro de una tarjeta que cambia de color al marcarla.
+        val tarjetaRepresentante = vista.findViewById<MaterialCardView>(R.id.cardCheckRepresentante)
+        tarjetaRepresentante.visibility = if (esMenor) View.VISIBLE else View.GONE
+
+        val casillas = listOfNotNull(
+            vista.findViewById<MaterialCardView>(R.id.cardCheckTerminos) to
+                    vista.findViewById<CheckBox>(R.id.cbAceptoTerminos),
+            vista.findViewById<MaterialCardView>(R.id.cardCheckDatos) to
+                    vista.findViewById<CheckBox>(R.id.cbAutorizoDatos),
+            if (esMenor) {
+                tarjetaRepresentante to vista.findViewById<CheckBox>(R.id.cbAutorizacionRepresentante)
+            } else null
+        )
 
         tvTexto.text = HtmlCompat.fromHtml(
             leerTextoTerminos(),
             HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 
-        cbRepresentante.visibility = if (esMenor) View.VISIBLE else View.GONE
+        val colorAzul = ContextCompat.getColor(this, R.color.tituloCurso)
+        val colorBorde = Color.parseColor("#E3E8F0")
+        val colorFondoMarcado = Color.parseColor("#EAF6FF")
+        val grosorBorde = (1 * resources.displayMetrics.density).toInt()
+        val grosorMarcado = (2 * resources.displayMetrics.density).toInt()
 
-        val casillas = listOfNotNull(
-            cbTerminos,
-            cbDatos,
-            if (esMenor) cbRepresentante else null
-        )
+        var lecturaCompleta = false
+
+        fun pintarTarjeta(tarjeta: MaterialCardView, marcada: Boolean) {
+            tarjeta.strokeColor = if (marcada) colorAzul else colorBorde
+            tarjeta.strokeWidth = if (marcada) grosorMarcado else grosorBorde
+            tarjeta.setCardBackgroundColor(if (marcada) colorFondoMarcado else Color.WHITE)
+        }
 
         fun actualizarBoton() {
-            btnAceptar.isEnabled = casillas.all { it.isChecked }
+            val listo = lecturaCompleta && casillas.all { it.second.isChecked }
+            btnAceptar.isEnabled = listo
+            btnAceptar.alpha = if (listo) 1f else 0.45f
         }
 
-        fun habilitarCasillas() {
-            casillas.forEach { it.isEnabled = true }
-            tvAviso.visibility = View.GONE
+        fun actualizarLectura() {
+
+            val contenido = scroll.getChildAt(0) ?: return
+            val recorrido = (contenido.height - scroll.height).coerceAtLeast(1)
+            val porcentaje = ((scroll.scrollY * 100) / recorrido).coerceIn(0, 100)
+
+            val alFinal = !scroll.canScrollVertically(1)
+
+            progreso.setProgressCompat(if (alFinal) 100 else porcentaje, true)
+
+            if (alFinal && !lecturaCompleta) {
+                lecturaCompleta = true
+                casillas.forEach { (tarjeta, casilla) ->
+                    casilla.isEnabled = true
+                    tarjeta.animate().alpha(1f).setDuration(200).start()
+                }
+                tvAviso.text = "✓ Lectura completa. Marca las casillas para continuar."
+                tvAviso.setTextColor(Color.parseColor("#2E7D32"))
+            } else if (!lecturaCompleta) {
+                tvAviso.text = "Lee hasta el final para poder aceptar · $porcentaje %"
+            }
+
+            actualizarBoton()
         }
 
-        casillas.forEach { casilla ->
-            casilla.setOnCheckedChangeListener { _, _ -> actualizarBoton() }
+        casillas.forEach { (tarjeta, casilla) ->
+
+            casilla.setOnCheckedChangeListener { _, marcada ->
+                pintarTarjeta(tarjeta, marcada)
+                actualizarBoton()
+            }
+
+            // Toda la tarjeta es tocable, no solo el cuadrito.
+            tarjeta.setOnClickListener {
+                if (casilla.isEnabled) casilla.isChecked = !casilla.isChecked
+            }
         }
 
-        // Se habilitan al llegar al final del texto (o si cabe completo).
-        scroll.setOnScrollChangeListener { _, _, _, _, _ ->
-            if (!scroll.canScrollVertically(1)) habilitarCasillas()
-        }
-        scroll.post {
-            if (!scroll.canScrollVertically(1)) habilitarCasillas()
-        }
+        scroll.setOnScrollChangeListener { _, _, _, _, _ -> actualizarLectura() }
+        scroll.post { actualizarLectura() }
 
-        val dialog = AlertDialog.Builder(this)
-            .setView(vista)
-            .setCancelable(false)
-            .create()
+        actualizarBoton()
+
+        val dialog = Dialog(this).apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(vista)
+            setCancelable(false)
+        }
 
         btnRechazar.setOnClickListener {
             dialog.dismiss()
@@ -239,6 +292,15 @@ class registro : AppCompatActivity() {
         }
 
         dialog.show()
+
+        // Ventana con esquinas redondeadas que ocupa el 88 % del alto de la pantalla.
+        dialog.window?.let { ventana ->
+            ventana.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            ventana.setLayout(
+                (resources.displayMetrics.widthPixels * 0.92).toInt(),
+                (resources.displayMetrics.heightPixels * 0.88).toInt()
+            )
+        }
     }
 
     private fun leerTextoTerminos(): String {

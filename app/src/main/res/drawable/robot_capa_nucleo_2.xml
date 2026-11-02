@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Capa de SYS-01: Núcleo de energía nivel 2. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="220dp"
+    android:height="180dp"
+    android:viewportWidth="220"
+    android:viewportHeight="180">
+    <path
+        android:pathData="M92,92 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 Z"
+        android:fillColor="#22E5FF"
+        android:fillAlpha="0.25" />
+    <path
+        android:pathData="M94,92 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0 Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#22E5FF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M99,92 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z"
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#22E5FF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M66,92 h26 M118,92 h26"
+        android:fillColor="#00000000"
+        android:strokeColor="#22E5FF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M188,12 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 Z"
+        android:fillColor="#22E5FF"
+        android:fillAlpha="0.4" />
+</vector>

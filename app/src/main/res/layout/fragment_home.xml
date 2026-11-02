@@ -305,6 +305,76 @@
 
         </androidx.cardview.widget.CardView>
 
+        <!-- ===================================================== -->
+        <!-- Tarjeta: acceso al minijuego SYS ROBOT                 -->
+        <!-- ===================================================== -->
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardSysRobot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="#0B1A3A"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_juego"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="18dp"
+                android:paddingBottom="10dp">
+
+                <ImageView
+                    android:id="@+id/imgSysRobotHome"
+                    android:layout_width="84dp"
+                    android:layout_height="70dp"
+                    android:contentDescription="SYS-01"
+                    android:src="@drawable/robot_sys01" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/bungee"
+                        android:text="SYS ROBOT"
+                        android:textColor="#22E5FF"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/tvEstadoSysRobot"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Vence virus con lo que aprendes"
+                        android:textColor="#B8C4D9"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textColor="@android:color/white"
+                    android:textSize="26sp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

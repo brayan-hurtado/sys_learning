@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Capa de SYS-01: Núcleo de energía nivel 3 (evolucionada). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="220dp"
+    android:height="180dp"
+    android:viewportWidth="220"
+    android:viewportHeight="180">
+    <path
+        android:pathData="M89,92 a16,16 0 1,0 32,0 a16,16 0 1,0 -32,0 Z"
+        android:fillColor="#E040FB"
+        android:fillAlpha="0.25" />
+    <path
+        android:pathData="M93,92 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0 Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#E040FB"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M98,92 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 Z"
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#E040FB"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M62,92 h30 M118,92 h30"
+        android:fillColor="#00000000"
+        android:strokeColor="#E040FB"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M168,50 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0 Z"
+        android:fillColor="#E040FB"
+        android:fillAlpha="0.35" />
+    <path
+        android:pathData="M172,50 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z"
+        android:fillColor="#E040FB" />
+    <path
+        android:pathData="M179,48 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 Z"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M187,12 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z"
+        android:fillColor="#E040FB"
+        android:fillAlpha="0.45" />
+    <path
+        android:pathData="M191,12 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z"
+        android:fillColor="#E040FB" />
+    <path
+        android:pathData="M14,67 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0 Z"
+        android:fillColor="#E040FB"
+        android:fillAlpha="0.4" />
+    <path
+        android:pathData="M18,67 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z"
+        android:fillColor="#E040FB" />
+</vector>

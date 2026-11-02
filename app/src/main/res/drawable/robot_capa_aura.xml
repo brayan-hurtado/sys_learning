@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aura de SYS-01 Omega: todas las mejoras al nivel 3. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="220dp"
+    android:height="180dp"
+    android:viewportWidth="220"
+    android:viewportHeight="180">
+    <path
+        android:pathData="M12,94 a100,80 0 1,0 200,0 a100,80 0 1,0 -200,0 Z"
+        android:fillColor="#22E5FF"
+        android:fillAlpha="0.1" />
+    <path
+        android:pathData="M18,94 a94,74 0 1,0 188,0 a94,74 0 1,0 -188,0 Z"
+        android:fillColor="#00000000"
+        android:fillAlpha="0.7"
+        android:strokeColor="#FFC107"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeAlpha="0.7" />
+    <path
+        android:pathData="M20,20 l3,7 l7,3 l-7,3 l-3,7 l-3,-7 l-7,-3 l7,-3 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M46,4 l3,7 l7,3 l-7,3 l-3,7 l-3,-7 l-7,-3 l7,-3 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M206,94 l3,7 l7,3 l-7,3 l-3,7 l-3,-7 l-7,-3 l7,-3 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M16,130 l3,7 l7,3 l-7,3 l-3,7 l-3,-7 l-7,-3 l7,-3 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M198,140 l3,7 l7,3 l-7,3 l-3,7 l-3,-7 l-7,-3 l7,-3 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M120,-2 l3,7 l7,3 l-7,3 l-3,7 l-3,-7 l-7,-3 l7,-3 Z"
+        android:fillColor="#FFF59D" />
+</vector>

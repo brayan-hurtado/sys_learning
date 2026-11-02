@@ -6,10 +6,13 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
+import android.widget.Button
 import android.widget.HorizontalScrollView
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
@@ -17,15 +20,22 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.example.syslearning.R
+import com.example.syslearning.juego.Gamificacion
+import com.example.syslearning.juego.ReglasGamificacion
 import com.example.syslearning.actividades.EvaluadorEjercicio.Respuesta
 import com.example.syslearning.model.Actividad
 import com.example.syslearning.model.Ejercicio
 import com.example.syslearning.model.PasoEjercicio
 import com.example.syslearning.model.TipoEjercicio
+import com.example.syslearning.util.LecturaRapida
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Source
 
 /**
  * Sesión de una micro actividad de 3 a 5 minutos, con los 7 pasos de la
@@ -46,9 +56,8 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
 
     private enum class Etapa(val numero: Int, val nombre: String) {
         CARGANDO(0, "Cargando"),
-        RETO(1, "Presentar el reto"),
-        CONCEPTO(2, "Explicar el concepto"),
-        EJEMPLO(3, "Ejemplo resuelto"),
+        /** Pasos 1 a 3 en una sola pantalla con el diseño de fragment_contenido. */
+        TEORIA(3, "Teoría"),
         PRACTICA(4, "Actividad práctica"),
         COMPROBACION(6, "Comprobación del aprendizaje"),
         RECOMPENSA(7, "Recompensa y registro")
@@ -64,11 +73,15 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
     private lateinit var tvRetroTitulo: TextView
     private lateinit var tvRetroMensaje: TextView
     private lateinit var btnPrincipal: MaterialButton
+    private lateinit var contenedorEjercicios: View
+    private lateinit var contenedorTeoria: ScrollView
 
     // ---- Datos ----
     private var actividadId = ""
     private var vistaPrevia = false
     private var actividad: Actividad? = null
+    private var documentoActividad: DocumentSnapshot? = null
+    private var ejerciciosCargados: List<Ejercicio>? = null
     private var practicas: List<Ejercicio> = emptyList()
     private var comprobaciones: List<Ejercicio> = emptyList()
 
@@ -119,6 +132,12 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
         tvRetroTitulo = view.findViewById(R.id.tvRetroTitulo)
         tvRetroMensaje = view.findViewById(R.id.tvRetroMensaje)
         btnPrincipal = view.findViewById(R.id.btnPrincipalMicro)
+        contenedorEjercicios = view.findViewById(R.id.contenedorEjercicios)
+        contenedorTeoria = view.findViewById(R.id.contenedorTeoria)
+
+        view.findViewById<Button>(R.id.btnComenzarPractica).setOnClickListener {
+            irA(Etapa.PRACTICA)
+        }
 
         view.findViewById<TextView>(R.id.tvVistaPrevia).visibility =
             if (vistaPrevia) View.VISIBLE else View.GONE
@@ -160,53 +179,125 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
         contenedor.addView(textoCuerpo("Cargando la actividad…"))
         btnPrincipal.visibility = View.GONE
 
-        FirebaseFirestore.getInstance()
+        if (actividadId.isBlank()) {
+            mostrarError("No se recibió el identificador de la actividad.")
+            return
+        }
+
+        val referencia = FirebaseFirestore.getInstance()
             .collection("actividades")
             .document(actividadId)
-            .get()
-            .addOnSuccessListener { doc ->
 
-                if (!isAdded) return@addOnSuccessListener
+        // La actividad y sus ejercicios se piden al mismo tiempo. Sin internet
+        // se leen de la copia del dispositivo, sin esperar al servidor.
+        documentoActividad = null
+        ejerciciosCargados = null
 
-                val datos = doc.toObject(Actividad::class.java)
-
-                if (datos == null) {
-                    mostrarError("La actividad ya no existe.")
-                    return@addOnSuccessListener
-                }
-
-                datos.id = doc.id
-                actividad = datos
-                cargarEjercicios()
+        LecturaRapida.documento(
+            context = requireContext(),
+            referencia = referencia,
+            onDatos = { doc, _ ->
+                documentoActividad = doc
+                intentarIniciar()
+            },
+            onError = { error ->
+                if (!isAdded) return@documento
+                Log.e(TAG, "Error al leer actividades/$actividadId", error)
+                mostrarError(mensajeError("la actividad", "actividades", error))
             }
-            .addOnFailureListener {
-                if (isAdded) mostrarError("No se pudo cargar la actividad.")
-            }
-    }
-
-    private fun cargarEjercicios() {
+        )
 
         EjerciciosRepository.obtenerDeActividad(
             actividadId = actividadId,
             soloActivos = true,
+            context = requireContext(),
             onSuccess = { lista ->
-
-                if (!isAdded) return@obtenerDeActividad
-
-                practicas = lista.filter { it.pasoEjercicio() == PasoEjercicio.PRACTICA }
-                comprobaciones = lista.filter { it.pasoEjercicio() == PasoEjercicio.COMPROBACION }
-
-                if (practicas.isEmpty() && comprobaciones.isEmpty()) {
-                    mostrarError("Esta actividad todavía no tiene ejercicios.")
-                    return@obtenerDeActividad
-                }
-
-                iniciarActividad()
+                ejerciciosCargados = lista
+                intentarIniciar()
             },
-            onError = {
-                if (isAdded) mostrarError("No se pudieron cargar los ejercicios.")
+            onError = { error ->
+                if (!isAdded) return@obtenerDeActividad
+                Log.e(TAG, "Error al leer ejercicios de $actividadId", error)
+                mostrarError(mensajeError("los ejercicios", "ejercicios", error))
             }
         )
+    }
+
+    /** Arranca cuando ya llegaron la actividad y sus ejercicios. */
+    private fun intentarIniciar() {
+        val doc = documentoActividad ?: return
+        if (ejerciciosCargados == null) return
+        procesarActividad(doc)
+    }
+
+    private fun procesarActividad(doc: DocumentSnapshot) {
+
+        if (!isAdded) return
+
+        if (!doc.exists()) {
+            mostrarError("La actividad ya no existe.")
+            return
+        }
+
+        val datos = try {
+            doc.toObject(Actividad::class.java)
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "El documento actividades/${doc.id} tiene un campo con un tipo inválido", e)
+            null
+        }
+
+        if (datos == null) {
+            mostrarError("Los datos de la actividad tienen un formato inválido. Edítala y guárdala de nuevo desde el panel de administrador.")
+            return
+        }
+
+        datos.id = doc.id
+        actividad = datos
+        cargarEjercicios()
+    }
+
+    /**
+     * Mensaje con la causa real del error de Firestore, para que se pueda
+     * corregir (por ejemplo, reglas de seguridad que no permiten leer).
+     */
+    private fun mensajeError(que: String, coleccion: String, error: Exception): String {
+
+        val codigo = (error as? FirebaseFirestoreException)?.code
+
+        return when (codigo) {
+            FirebaseFirestoreException.Code.PERMISSION_DENIED ->
+                "No se pudo cargar $que: las reglas de Firestore no permiten leer la colección «$coleccion». " +
+                        "Hay que agregar esa colección en las reglas de seguridad."
+            FirebaseFirestoreException.Code.UNAVAILABLE ->
+                "No se pudo cargar $que: no hay conexión y todavía no está guardada en el dispositivo. " +
+                        "Ábrela una vez con internet para poder usarla sin conexión."
+            FirebaseFirestoreException.Code.UNAUTHENTICATED ->
+                "No se pudo cargar $que: la sesión expiró. Cierra sesión y vuelve a ingresar."
+            null -> "No se pudo cargar $que (${error.javaClass.simpleName}: ${error.localizedMessage})."
+            else -> "No se pudo cargar $que (código $codigo)."
+        }
+    }
+
+    private fun cargarEjercicios() {
+
+        val lista = ejerciciosCargados ?: return
+
+        practicas = lista.filter { it.pasoEjercicio() == PasoEjercicio.PRACTICA }
+        comprobaciones = lista.filter { it.pasoEjercicio() == PasoEjercicio.COMPROBACION }
+
+        if (practicas.isEmpty() && comprobaciones.isEmpty()) {
+            mostrarError(
+                if (LecturaRapida.hayConexion(requireContext())) {
+                    "Esta actividad todavía no tiene ejercicios."
+                } else {
+                    "Sin conexión: los ejercicios de esta actividad aún no están guardados en el " +
+                            "dispositivo. Ábrela una vez con internet."
+                }
+            )
+            return
+        }
+
+        iniciarActividad()
     }
 
     private fun iniciarActividad() {
@@ -233,7 +324,7 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
             )
         }
 
-        irA(Etapa.RETO)
+        irA(Etapa.TEORIA)
     }
 
     // ==================================================================
@@ -246,9 +337,7 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
 
         // Los pasos sin contenido se saltan.
         val siguiente = when {
-            destino == Etapa.RETO && act.reto.isBlank() -> Etapa.CONCEPTO
-            destino == Etapa.CONCEPTO && act.concepto.isBlank() -> Etapa.EJEMPLO
-            destino == Etapa.EJEMPLO &&
+            destino == Etapa.TEORIA && act.reto.isBlank() && act.concepto.isBlank() &&
                     act.ejemploCodigo.isBlank() && act.ejemploExplicacion.isBlank() -> Etapa.PRACTICA
             destino == Etapa.PRACTICA && practicas.isEmpty() -> Etapa.COMPROBACION
             destino == Etapa.COMPROBACION && comprobacionActual == null -> Etapa.RECOMPENSA
@@ -261,6 +350,12 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
         }
 
         etapa = destino
+
+        // La teoría tiene su propia pantalla; los demás pasos usan la de ejercicios.
+        val esTeoria = destino == Etapa.TEORIA
+        contenedorTeoria.visibility = if (esTeoria) View.VISIBLE else View.GONE
+        contenedorEjercicios.visibility = if (esTeoria) View.GONE else View.VISIBLE
+
         ocultarRetro()
         contenedor.removeAllViews()
         scroll.scrollTo(0, 0)
@@ -268,9 +363,7 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
 
         when (destino) {
             Etapa.CARGANDO -> Unit
-            Etapa.RETO -> mostrarReto(act)
-            Etapa.CONCEPTO -> mostrarConcepto(act)
-            Etapa.EJEMPLO -> mostrarEjemplo(act)
+            Etapa.TEORIA -> mostrarTeoria(act)
             Etapa.PRACTICA -> {
                 indicePractica = 0
                 mostrarEjercicio(practicas[0])
@@ -281,7 +374,7 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
 
         actualizarEncabezado()
 
-        if (!vistaPrevia && destino.numero in 1..3) {
+        if (!vistaPrevia && destino == Etapa.TEORIA) {
             RegistroEventos.registrar(
                 RegistroEventos.PASO_VISTO,
                 mapOf(
@@ -311,48 +404,65 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
     }
 
     // ==================================================================
-    // Pasos 1 a 3: reto, concepto y ejemplo
+    // Pasos 1 a 3: teoría (mismo diseño que fragment_contenido)
     // ==================================================================
 
-    private fun mostrarReto(act: Actividad) {
+    private fun mostrarTeoria(act: Actividad) {
 
-        contenedor.addView(etiqueta("Módulo ${act.modulo} · ${act.titulo}"))
-        contenedor.addView(textoTitulo("🧩 ${act.reto}"))
+        val vista = contenedorTeoria
 
-        if (act.objetivo.isNotBlank()) {
-            contenedor.addView(espacio(16))
-            contenedor.addView(etiqueta("Al terminar podrás"))
-            contenedor.addView(textoCuerpo(act.objetivo))
+        val imgPortada = vista.findViewById<ImageView>(R.id.imgPortadaTeoria)
+
+        if (act.imagen.isNotBlank()) {
+            Glide.with(this)
+                .load(act.imagen)
+                .placeholder(R.drawable.img_programacion)
+                .error(R.drawable.img_programacion)
+                .into(imgPortada)
+        } else {
+            imgPortada.setImageResource(R.drawable.img_programacion)
         }
 
-        configurarBoton("Empezar") { irA(Etapa.CONCEPTO) }
+        vista.findViewById<TextView>(R.id.tvTituloTeoria).text = act.titulo
+
+        // Paso 1: el reto, debajo del título (como la descripción del curso).
+        mostrarSiHay(vista.findViewById(R.id.tvRetoTeoria), act.reto)
+
+        // Resultado de aprendizaje.
+        vista.findViewById<View>(R.id.cardObjetivoTeoria).visibility =
+            if (act.objetivo.isBlank()) View.GONE else View.VISIBLE
+        vista.findViewById<TextView>(R.id.tvObjetivoTeoria).text = act.objetivo
+
+        // Paso 2: el concepto.
+        mostrarSiHay(vista.findViewById(R.id.tvConceptoTeoria), act.concepto)
+
+        // Paso 3: el ejemplo resuelto, dentro de la misma tarjeta.
+        val hayEjemplo = act.ejemploCodigo.isNotBlank() || act.ejemploExplicacion.isNotBlank()
+        vista.findViewById<View>(R.id.grupoEjemploTeoria).visibility =
+            if (hayEjemplo) View.VISIBLE else View.GONE
+        vista.findViewById<View>(R.id.scrollCodigoTeoria).visibility =
+            if (act.ejemploCodigo.isBlank()) View.GONE else View.VISIBLE
+        vista.findViewById<TextView>(R.id.tvCodigoTeoria).text = act.ejemploCodigo
+        mostrarSiHay(vista.findViewById(R.id.tvExplicacionEjemploTeoria), act.ejemploExplicacion)
+
+        // Tarjetas opcionales.
+        vista.findViewById<View>(R.id.cardSabiasQueTeoria).visibility =
+            if (act.sabiasQue.isBlank()) View.GONE else View.VISIBLE
+        vista.findViewById<TextView>(R.id.tvSabiasQueTeoria).text = act.sabiasQue
+
+        vista.findViewById<View>(R.id.cardConsejoTeoria).visibility =
+            if (act.consejo.isBlank()) View.GONE else View.VISIBLE
+        vista.findViewById<TextView>(R.id.tvConsejoTeoria).text = act.consejo
+
+        vista.findViewById<Button>(R.id.btnComenzarPractica).text =
+            if (practicas.isEmpty()) "Comenzar comprobación" else "Comenzar práctica"
+
+        vista.scrollTo(0, 0)
     }
 
-    private fun mostrarConcepto(act: Actividad) {
-
-        contenedor.addView(etiqueta("Concepto"))
-        contenedor.addView(textoTitulo(act.titulo))
-        contenedor.addView(espacio(8))
-        contenedor.addView(textoCuerpo(act.concepto))
-
-        configurarBoton("Ver un ejemplo") { irA(Etapa.EJEMPLO) }
-    }
-
-    private fun mostrarEjemplo(act: Actividad) {
-
-        contenedor.addView(etiqueta("Ejemplo resuelto"))
-
-        if (act.ejemploCodigo.isNotBlank()) {
-            contenedor.addView(bloqueCodigo(act.ejemploCodigo))
-        }
-
-        if (act.ejemploExplicacion.isNotBlank()) {
-            contenedor.addView(espacio(12))
-            contenedor.addView(etiqueta("¿Qué pasa al ejecutarlo?"))
-            contenedor.addView(textoCuerpo(act.ejemploExplicacion))
-        }
-
-        configurarBoton("¡A practicar!") { irA(Etapa.PRACTICA) }
+    private fun mostrarSiHay(tv: TextView, valor: String) {
+        tv.text = valor
+        tv.visibility = if (valor.isBlank()) View.GONE else View.VISIBLE
     }
 
     // ==================================================================
@@ -666,13 +776,14 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
         val xp = EvaluadorEjercicio.xpTotal(intentoAcierto)
         val semaforo = EvaluadorEjercicio.semaforo(intentoAcierto)
 
-        var racha = 0
+        var registrarMonedas = false
 
         if (!vistaPrevia && !terminada) {
 
             terminada = true
+            registrarMonedas = true
 
-            racha = SesionActividadesManager.registrarMicroActividad(
+            SesionActividadesManager.registrarMicroActividad(
                 context = requireContext(),
                 actividadId = act.id,
                 actividadTitulo = act.titulo,
@@ -707,15 +818,64 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
             gravity = Gravity.CENTER
         })
 
+        val esReto = ProgresoModulos.esReto(act)
+
         contenedor.addView(textoTitulo(
-            if (dominada) "¡Micro actividad dominada!" else "Actividad terminada"
+            when {
+                dominada && esReto -> "¡Reto final superado! Módulo ${act.modulo} completado"
+                dominada -> "¡Micro actividad dominada!"
+                else -> "Actividad terminada"
+            }
         ).apply { gravity = Gravity.CENTER })
 
         contenedor.addView(espacio(12))
         contenedor.addView(filaResumen("XP ganado", "+$xp XP"))
 
         if (!vistaPrevia) {
-            contenedor.addView(filaResumen("Racha", "🔥 $racha día(s)"))
+
+            // Monedas y racha (juego SYS ROBOT). Son distintas de los puntos
+            // del ranking. Se calculan al leer el saldo, por eso llegan después.
+            val filaMonedas = filaResumen("Monedas", "…", Color.parseColor("#B8860B"))
+            val filaRacha = filaResumen("Racha", "…")
+            val tvHito = textoCuerpo("").apply {
+                gravity = Gravity.CENTER
+                setTextColor(Color.parseColor("#B8860B"))
+                visibility = View.GONE
+            }
+            contenedor.addView(filaMonedas)
+            contenedor.addView(filaRacha)
+            contenedor.addView(tvHito)
+
+            if (registrarMonedas) {
+                Gamificacion.registrarActividad(
+                    context = requireContext(),
+                    actividadId = act.id,
+                    dominada = dominada,
+                    intentoAcierto = intentoAcierto,
+                    esReto = ProgresoModulos.esReto(act)
+                ) { resultado ->
+
+                    if (!isAdded) return@registrarActividad
+
+                    valorDe(filaMonedas).text =
+                        if (resultado.total > 0) "+${resultado.total} 🪙" else "0 🪙"
+
+                    valorDe(filaRacha).text = "🔥 ${resultado.racha} día(s)" +
+                            if (!resultado.rachaAumento) " (ya contaba hoy)" else ""
+
+                    val detalle = mutableListOf<String>()
+                    detalle.add("${resultado.motivoActividad}: ${resultado.monedasActividad} 🪙")
+                    if (resultado.monedasRacha > 0) detalle.add("Racha del día: ${resultado.monedasRacha} 🪙")
+                    resultado.hitosNuevos.forEach { dias ->
+                        detalle.add("🎉 ¡Racha de $dias días! +${ReglasGamificacion.HITOS_RACHA[dias]} 🪙")
+                    }
+                    tvHito.text = detalle.joinToString("\n")
+                    tvHito.visibility = View.VISIBLE
+                }
+            } else {
+                valorDe(filaMonedas).text = "—"
+                valorDe(filaRacha).text = "—"
+            }
         }
 
         val (colorSemaforo, textoSemaforo) = when (semaforo) {
@@ -729,7 +889,9 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
         contenedor.addView(espacio(16))
 
         contenedor.addView(textoCuerpo(
-            if (dominada) {
+            if (dominada && esReto) {
+                "Superaste el reto final. El siguiente módulo ya está desbloqueado."
+            } else if (dominada) {
                 "Superaste la comprobación. La siguiente actividad de la ruta ya está disponible."
             } else {
                 "Repasa el concepto y vuelve a intentarlo: la comprobación será distinta. " +
@@ -757,6 +919,9 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
             })
         }
     }
+
+    /** Texto del valor (a la derecha) de una fila creada con filaResumen. */
+    private fun valorDe(fila: View): TextView = (fila as LinearLayout).getChildAt(1) as TextView
 
     private fun filaResumen(etiquetaTexto: String, valor: String, colorValor: Int = texto): View {
 
@@ -791,7 +956,7 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
 
     private fun confirmarSalida() {
 
-        if (etapa == Etapa.RECOMPENSA || etapa == Etapa.CARGANDO || vistaPrevia) {
+        if (etapa == Etapa.RECOMPENSA || etapa == Etapa.CARGANDO || etapa == Etapa.TEORIA || vistaPrevia) {
             salir()
             return
         }
@@ -941,6 +1106,7 @@ class MicroActividadFragment : Fragment(R.layout.fragment_micro_actividad) {
 
     companion object {
 
+        private const val TAG = "MICRO_ACTIVIDAD"
         private const val ARG_ID = "actividadId"
         private const val ARG_VISTA_PREVIA = "vistaPrevia"
 

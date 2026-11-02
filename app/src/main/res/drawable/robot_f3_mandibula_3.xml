@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SYS-01 Omega: mandíbula láser nivel 3. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="260dp"
+    android:height="200dp"
+    android:viewportWidth="260"
+    android:viewportHeight="200">
+    <group android:translateX="192" android:translateY="56" android:scaleX="1.06" android:scaleY="1.06">
+        <path
+            android:pathData="M20,14 L50,12 C58,12 60,20 52,26 L26,28 C20,24 18,18 20,14 Z"
+            android:strokeColor="#FFF3B0"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round">
+            <aapt:attr name="android:fillColor">
+              <gradient android:type="linear" android:startX="0" android:startY="10" android:endX="0" android:endY="28">
+                <item android:offset="0" android:color="#FFF3B0" />
+                <item android:offset="0.45" android:color="#FFC107" />
+                <item android:offset="1" android:color="#B26A00" />
+              </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M26,14 l3,6 l3,-6 l3,6 l3,-6 l3,6 l3,-6 l3,6 l3,-6"
+            android:fillColor="#FFFFFF" />
+        <path
+            android:pathData="M47,2 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z">
+            <aapt:attr name="android:fillColor">
+              <gradient android:type="radial" android:centerX="55" android:centerY="2" android:gradientRadius="8">
+                <item android:offset="0" android:color="#FFFFFF" />
+                <item android:offset="0.4" android:color="#FFEB3B" />
+                <item android:offset="1" android:color="#00000000" />
+              </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M32,-12 h18 a4,4 0 0,1 4,4 v0 a4,4 0 0,1 -4,4 h-18 a4,4 0 0,1 -4,-4 v0 a4,4 0 0,1 4,-4 Z"
+            android:strokeColor="#B26A00"
+            android:strokeWidth="1.5"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round">
+            <aapt:attr name="android:fillColor">
+              <gradient android:type="linear" android:startX="0" android:startY="-12" android:endX="0" android:endY="-4">
+                <item android:offset="0" android:color="#FFF3B0" />
+                <item android:offset="0.45" android:color="#FFC107" />
+                <item android:offset="1" android:color="#B26A00" />
+              </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M51,-8 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 Z">
+            <aapt:attr name="android:fillColor">
+              <gradient android:type="radial" android:centerX="56" android:centerY="-8" android:gradientRadius="5">
+                <item android:offset="0" android:color="#FFFFFF" />
+                <item android:offset="0.5" android:color="#FFEB3B" />
+                <item android:offset="1" android:color="#FF9800" />
+              </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+</vector>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Capa de SYS-01: Mandíbula láser nivel 3 (evolucionada). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="220dp"
+    android:height="180dp"
+    android:viewportWidth="220"
+    android:viewportHeight="180">
+    <path
+        android:pathData="M187,72 h26 a5,5 0 0,1 5,5 v3 a5,5 0 0,1 -5,5 h-26 a5,5 0 0,1 -5,-5 v-3 a5,5 0 0,1 5,-5 Z"
+        android:fillColor="#FFC107"
+        android:strokeColor="#FFE082"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M190,72 l3,6 l3,-6 l3,6 l3,-6 l3,6 l3,-6 l3,6 l3,-6"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M188,57 l8,-8 l8,8 l8,-8 l6,8"
+        android:fillColor="#FFC107"
+        android:strokeColor="#FFE082"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M204,66 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 Z"
+        android:fillColor="#FFEB3B"
+        android:fillAlpha="0.35" />
+    <path
+        android:pathData="M206.5,66 a4.5,4.5 0 1,0 9.0,0 a4.5,4.5 0 1,0 -9.0,0 Z"
+        android:fillColor="#FFEB3B"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

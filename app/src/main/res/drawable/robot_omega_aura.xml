@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aura dorada de SYS-01 Omega. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="260dp"
+    android:height="200dp"
+    android:viewportWidth="260"
+    android:viewportHeight="200">
+    <path
+        android:pathData="M4,96 a126,94 0 1,0 252,0 a126,94 0 1,0 -252,0 Z">
+        <aapt:attr name="android:fillColor">
+          <gradient android:type="radial" android:centerX="130" android:centerY="96" android:gradientRadius="126">
+            <item android:offset="0" android:color="#00FFD54F" />
+            <item android:offset="0.6" android:color="#33FFD54F" />
+            <item android:offset="0.85" android:color="#66FFC107" />
+            <item android:offset="1" android:color="#00FFC107" />
+          </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:pathData="M24,30 l3,7 l7,3 l-7,3 l-3,7 l-3,-7 l-7,-3 l7,-3 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M52,11.0 l2.0999999999999996,4.8999999999999995 l4.8999999999999995,2.0999999999999996 l-4.8999999999999995,2.0999999999999996 l-2.0999999999999996,4.8999999999999995 l-2.0999999999999996,-4.8999999999999995 l-4.8999999999999995,-2.0999999999999996 l4.8999999999999995,-2.0999999999999996 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M236,110 l3,7 l7,3 l-7,3 l-3,7 l-3,-7 l-7,-3 l7,-3 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M20,142.0 l2.4000000000000004,5.6000000000000005 l5.6000000000000005,2.4000000000000004 l-5.6000000000000005,2.4000000000000004 l-2.4000000000000004,5.6000000000000005 l-2.4000000000000004,-5.6000000000000005 l-5.6000000000000005,-2.4000000000000004 l5.6000000000000005,-2.4000000000000004 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M226,163.0 l2.0999999999999996,4.8999999999999995 l4.8999999999999995,2.0999999999999996 l-4.8999999999999995,2.0999999999999996 l-2.0999999999999996,4.8999999999999995 l-2.0999999999999996,-4.8999999999999995 l-4.8999999999999995,-2.0999999999999996 l4.8999999999999995,-2.0999999999999996 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M140,1.0 l2.7,6.3 l6.3,2.7 l-6.3,2.7 l-2.7,6.3 l-2.7,-6.3 l-6.3,-2.7 l6.3,-2.7 Z"
+        android:fillColor="#FFF59D" />
+    <path
+        android:pathData="M232,34.0 l1.7999999999999998,4.2 l4.2,1.7999999999999998 l-4.2,1.7999999999999998 l-1.7999999999999998,4.2 l-1.7999999999999998,-4.2 l-4.2,-1.7999999999999998 l4.2,-1.7999999999999998 Z"
+        android:fillColor="#FFF59D" />
+</vector>

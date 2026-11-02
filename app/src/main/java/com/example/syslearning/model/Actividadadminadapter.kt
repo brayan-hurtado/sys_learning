@@ -16,6 +16,9 @@ class ActividadAdminAdapter(
     private val onLongClick: (Actividad) -> Unit
 ) : RecyclerView.Adapter<ActividadAdminAdapter.ViewHolder>() {
 
+    /** Número de módulo -> título, para mostrarlo en cada fila. */
+    var nombresModulos: Map<Int, String> = emptyMap()
+
     class ViewHolder(val card: MaterialCardView) : RecyclerView.ViewHolder(card) {
         val tvTitulo: TextView = card.findViewById(R.id.tvTituloActividadAdmin)
         val tvDetalle: TextView = card.findViewById(R.id.tvDetalleActividadAdmin)
@@ -34,9 +37,12 @@ class ActividadAdminAdapter(
 
         val actividad = lista[position]
 
-        holder.tvTitulo.text = actividad.titulo
+        val nombreModulo = nombresModulos[actividad.modulo]?.let { " $it" } ?: ""
+        val esReto = NivelActividad.desde(actividad.nivel) == NivelActividad.INTEGRACION
+        holder.tvTitulo.text = (if (esReto) "🏆 " else "") + actividad.titulo
         holder.tvDetalle.text =
-            "Módulo ${actividad.modulo} · ${NivelActividad.desde(actividad.nivel).etiqueta} · orden ${actividad.orden}"
+            "Módulo ${actividad.modulo}$nombreModulo · ${if (esReto) "Reto final" else NivelActividad.desde(actividad.nivel).etiqueta} · orden ${actividad.orden}\n" +
+                    if (actividad.aulasAsignadas.isEmpty()) "🌐 Global" else "🏫 ${actividad.aulasAsignadas.joinToString(", ")}"
 
         if (actividad.activo) {
             holder.tvEstado.text = "Activa"

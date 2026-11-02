@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SYS-01 Guardián: núcleo de energía nivel 1. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="260dp"
+    android:height="200dp"
+    android:viewportWidth="260"
+    android:viewportHeight="200">
+    <group android:translateX="110" android:translateY="110" android:scaleX="1.06" android:scaleY="1.0">
+        <path
+            android:pathData="M-8,-6 a16,16 0 1,0 32,0 a16,16 0 1,0 -32,0 Z">
+            <aapt:attr name="android:fillColor">
+              <gradient android:type="radial" android:centerX="8" android:centerY="-6" android:gradientRadius="16">
+                <item android:offset="0" android:color="#FFFFFF" />
+                <item android:offset="0.3" android:color="#22E5FF" />
+                <item android:offset="1" android:color="#00000000" />
+              </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M0,-6 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="1.5"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round">
+            <aapt:attr name="android:fillColor">
+              <gradient android:type="radial" android:centerX="6" android:centerY="-8" android:gradientRadius="8">
+                <item android:offset="0" android:color="#FFFFFF" />
+                <item android:offset="0.5" android:color="#22E5FF" />
+                <item android:offset="1" android:color="#0B4F6C" />
+              </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+</vector>

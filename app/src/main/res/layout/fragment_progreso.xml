@@ -68,10 +68,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0 de 0 cursos completados"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="#666666"
                     android:layout_marginTop="8dp"/>
+
+                <TextView
+                    android:id="@+id/tvActividadesCompletadasGeneral"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 de 0 actividades completadas"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#666666"
+                    android:layout_marginTop="2dp"/>
 
             </LinearLayout>
 
@@ -165,6 +175,136 @@
                         android:text="Favorita"
                         android:textStyle="bold"
                         android:textSize="15sp"/>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+        <!-- Actividades realizadas + Nivel (gamificación) -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <!-- Actividades -->
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="170dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:src="@drawable/ic_actividades"
+                        app:tint="#8B5CF6"/>
+
+                    <TextView
+                        android:id="@+id/tvNumeroActividades"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="0"
+                        android:textColor="@color/tituloCurso"
+                        android:textSize="34sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Actividades"
+                        android:textSize="15sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/tvDetalleActividades"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:gravity="center"
+                        android:text="0 intentos"
+                        android:textColor="#8A93A6"
+                        android:textSize="12sp"/>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Nivel y XP -->
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="170dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardBackgroundColor="#143C8A"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⭐"
+                        android:textSize="30sp"/>
+
+                    <TextView
+                        android:id="@+id/tvNivel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Nivel 1"
+                        android:textColor="@android:color/white"
+                        android:textSize="24sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/tvXpTotal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 XP"
+                        android:textColor="#FFD54F"
+                        android:textSize="15sp"
+                        android:textStyle="bold"/>
+
+                    <ProgressBar
+                        android:id="@+id/progresoNivel"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="10dp"
+                        android:max="200"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/progress_horizontal"/>
+
+                    <TextView
+                        android:id="@+id/tvXpSiguienteNivel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="200 XP para el nivel 2"
+                        android:textColor="#DCE8FF"
+                        android:textSize="11sp"/>
 
                 </LinearLayout>
 
@@ -426,93 +566,76 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Encabezado -->
+                <!-- Encabezado azul con el podio de los 3 primeros -->
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#143C8A"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="34dp"
-                        android:layout_height="34dp"
-                        android:src="@drawable/ic_trophy"
-                        app:tint="@android:color/white" />
+                    android:background="@drawable/fondo_home"
+                    android:orientation="vertical"
+                    android:paddingTop="16dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:orientation="vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+
+                        <ImageView
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:src="@drawable/ic_trophy"
+                            app:tint="@android:color/white" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tabla de posiciones"
+                                android:textColor="@android:color/white"
+                                android:textSize="19sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:id="@+id/tvAlcanceRanking"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Compite con otros estudiantes"
+                                android:textColor="#DCE8FF"
+                                android:textSize="12sp"/>
+
+                        </LinearLayout>
 
                         <TextView
+                            android:id="@+id/tvMiPuesto"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Tabla de posiciones"
-                            android:textColor="@android:color/white"
-                            android:textSize="19sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Compite con otros estudiantes"
-                            android:textColor="#DCE8FF"
-                            android:textSize="12sp"/>
+                            android:paddingStart="10dp"
+                            android:paddingTop="4dp"
+                            android:paddingEnd="10dp"
+                            android:paddingBottom="4dp"
+                            android:textColor="#143C8A"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:visibility="gone"/>
 
                     </LinearLayout>
 
+                    <include layout="@layout/vista_podio_ranking" />
+
                 </LinearLayout>
 
-                <!-- Encabezado de columnas -->
-
-                <LinearLayout
+                <View
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#1AC2CA"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="14dp"
-                    android:paddingTop="10dp"
-                    android:paddingEnd="14dp"
-                    android:paddingBottom="10dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2.4"
-                        android:text="Usuario"
-                        android:textColor="#143C8A"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Racha"
-                        android:textSize="13sp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Cursos"
-                        android:textSize="13sp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="⭐"
-                        android:textSize="18sp"/>
-
-                </LinearLayout>
+                    android:layout_height="8dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvRanking"
@@ -530,6 +653,17 @@
                     android:textColor="#7A7A7A"
                     android:textSize="14sp"
                     android:visibility="gone"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:background="#F5F7FA"
+                    android:lineSpacingExtra="2dp"
+                    android:padding="12dp"
+                    android:text="¿Cómo sumar puntos?\n📚 Curso leído: 100   🧩 Actividad dominada: 50\n⭐ 1 punto por cada XP   🎯 Precisión: hasta 100\n🔥 La Palabra del Día: racha y palabras ganadas\n🔁 = intentos en actividades"
+                    android:textColor="#616161"
+                    android:textSize="12sp"/>
 
             </LinearLayout>
 

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SYS-01 Cachorro: armadura y casco nivel 1. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="260dp"
+    android:height="200dp"
+    android:viewportWidth="260"
+    android:viewportHeight="200">
+    <group android:translateX="104" android:translateY="124" android:scaleX="0.78" android:scaleY="0.8">
+        <path
+            android:pathData="M30,-24 C48,-22 60,-10 60,4 C60,16 52,24 40,26 L30,26 C34,10 34,-10 30,-24 Z"
+            android:strokeColor="#BDEBFF"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round">
+            <aapt:attr name="android:fillColor">
+              <gradient android:type="linear" android:startX="0" android:startY="-24" android:endX="0" android:endY="26">
+                <item android:offset="0" android:color="#7FD6FF" />
+                <item android:offset="0.5" android:color="#2F8CFF" />
+                <item android:offset="1" android:color="#0D47A1" />
+              </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M22,-22 h8 a8,8 0 0,1 8,8 v6 a8,8 0 0,1 -8,8 h-8 a8,8 0 0,1 -8,-8 v-6 a8,8 0 0,1 8,-8 Z"
+            android:strokeColor="#BDEBFF"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round">
+            <aapt:attr name="android:fillColor">
+              <gradient android:type="linear" android:startX="0" android:startY="-22" android:endX="0" android:endY="0">
+                <item android:offset="0" android:color="#7FD6FF" />
+                <item android:offset="0.5" android:color="#2F8CFF" />
+                <item android:offset="1" android:color="#0D47A1" />
+              </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+</vector>

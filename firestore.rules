@@ -1,0 +1,102 @@
+rules_version = '2';
+
+// Reglas de seguridad de Cloud Firestore para Sys Learning.
+// Copia este archivo en Firebase Console > Firestore Database > Reglas
+// y toca "Publicar".
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------------
+    // Funciones de apoyo
+    // ---------------------------------------------------------------
+
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    // El rol se lee del documento del propio usuario. Pantalla2.kt
+    // abre el panel de administrador cuando rol == "admin".
+    function esAdmin() {
+      return autenticado() &&
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.get('rol', '') == 'admin';
+    }
+
+    // ---------------------------------------------------------------
+    // Usuarios
+    // ---------------------------------------------------------------
+
+    match /usuarios/{uid} {
+
+      allow read: if autenticado();
+
+      // Al registrarse, el rol solo puede ser "estudiante" (registro.kt).
+      // Las cuentas de administrador se crean o asignan desde la consola.
+      allow create: if autenticado()
+                    && request.auth.uid == uid
+                    && request.resource.data.get('rol', 'estudiante') == 'estudiante';
+
+      // Cada usuario edita su perfil, progreso, rachas y aulas,
+      // pero NO puede cambiar su propio rol. El administrador sí.
+      allow update: if esAdmin()
+                    || (autenticado()
+                        && request.auth.uid == uid
+                        && request.resource.data.get('rol', null) == resource.data.get('rol', null));
+
+      allow delete: if false;
+
+      // Eventos de aprendizaje (RF 14). Los escribe RegistroEventos.kt.
+      // Son un historial: no se editan ni se borran desde la app.
+      match /eventos/{eventoId} {
+        allow create: if autenticado() && request.auth.uid == uid;
+        allow read: if autenticado() && (request.auth.uid == uid || esAdmin());
+        allow update, delete: if false;
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Aulas y cursos (sin cambios respecto a las reglas anteriores)
+    // ---------------------------------------------------------------
+
+    match /aulas/{aulaId} {
+      allow read: if autenticado();
+      allow create: if autenticado();
+      allow update, delete: if autenticado()
+                            && resource.data.adminUid == request.auth.uid;
+    }
+
+    match /cursos/{cursoId} {
+      allow read: if autenticado();
+      allow create: if autenticado();
+      allow update, delete: if autenticado()
+                            && resource.data.creadoPor == request.auth.uid;
+    }
+
+    // ---------------------------------------------------------------
+    // Contenido de aprendizaje: todos leen, solo el administrador edita
+    // ---------------------------------------------------------------
+
+    match /actividades/{actividadId} {
+      allow read: if autenticado();
+      allow write: if esAdmin();
+    }
+
+    // Módulos que agrupan las actividades (ModulosRepository.kt).
+    match /modulos/{moduloId} {
+      allow read: if autenticado();
+      allow write: if esAdmin();
+    }
+
+    // Ejercicios de las micro actividades (EjerciciosRepository.kt).
+    match /ejercicios/{ejercicioId} {
+      allow read: if autenticado();
+      allow write: if esAdmin();
+    }
+
+    // Preguntas del quiz anterior (SesionActividadFragment).
+    match /preguntas/{preguntaId} {
+      allow read: if autenticado();
+      allow write: if esAdmin();
+    }
+  }
+}

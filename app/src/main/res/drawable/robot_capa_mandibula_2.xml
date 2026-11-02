@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Capa de SYS-01: Mandíbula láser nivel 2. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="220dp"
+    android:height="180dp"
+    android:viewportWidth="220"
+    android:viewportHeight="180">
+    <path
+        android:pathData="M188,74 h26 a4,4 0 0,1 4,4 v2 a4,4 0 0,1 -4,4 h-26 a4,4 0 0,1 -4,-4 v-2 a4,4 0 0,1 4,-4 Z"
+        android:fillColor="#1E88FF"
+        android:strokeColor="#22E5FF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M192,74 l3,5 l3,-5 l3,5 l3,-5 l3,5 l3,-5"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M210,66 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z"
+        android:fillColor="#FF5252"
+        android:fillAlpha="0.35" />
+    <path
+        android:pathData="M212.5,66 a3.5,3.5 0 1,0 7.0,0 a3.5,3.5 0 1,0 -7.0,0 Z"
+        android:fillColor="#FF5252" />
+</vector>

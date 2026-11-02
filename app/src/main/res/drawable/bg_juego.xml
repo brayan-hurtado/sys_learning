@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo del minijuego SYS ROBOT: mundo digital oscuro. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="270"
+        android:startColor="#050B1F"
+        android:centerColor="#0B1A3A"
+        android:endColor="#123A7A" />
+</shape>

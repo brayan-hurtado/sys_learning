@@ -1,7 +1,10 @@
 package com.example.syslearning.actividades
 
 import com.example.syslearning.model.Ejercicio
+import android.content.Context
+import com.example.syslearning.util.LecturaRapida
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 
 /**
  * Acceso a la colección "ejercicios". Las consultas usan un solo filtro
@@ -14,30 +17,50 @@ object EjerciciosRepository {
 
     private val db get() = FirebaseFirestore.getInstance()
 
-    /** Todos los ejercicios de una actividad, ordenados por "orden". */
+    /**
+     * Todos los ejercicios de una actividad, ordenados por "orden".
+     *
+     * Con [context] (pantallas del estudiante) la lectura no espera al
+     * servidor cuando no hay internet: usa la copia del dispositivo.
+     * Sin [context] (panel del administrador) se lee siempre del servidor.
+     */
     fun obtenerDeActividad(
         actividadId: String,
         soloActivos: Boolean,
         onSuccess: (List<Ejercicio>) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (Exception) -> Unit,
+        context: Context? = null
     ) {
 
-        db.collection(COLECCION)
+        val consulta = db.collection(COLECCION)
             .whereEqualTo("actividadId", actividadId)
-            .get()
-            .addOnSuccessListener { documentos ->
 
-                val lista = documentos.mapNotNull { doc ->
-                    runCatching {
-                        doc.toObject(Ejercicio::class.java).apply { id = doc.id }
-                    }.getOrNull()
-                }
-                    .filter { !soloActivos || it.activo }
-                    .sortedBy { it.orden }
+        val procesar: (QuerySnapshot) -> Unit = { documentos ->
 
-                onSuccess(lista)
+            val lista = documentos.mapNotNull { doc ->
+                runCatching {
+                    doc.toObject(Ejercicio::class.java).apply { id = doc.id }
+                }.getOrNull()
             }
-            .addOnFailureListener { onError(it) }
+                .filter { !soloActivos || it.activo }
+                .sortedBy { it.orden }
+
+            onSuccess(lista)
+        }
+
+        if (context != null) {
+            LecturaRapida.consulta(
+                context = context,
+                query = consulta,
+                refrescar = false,
+                onDatos = { documentos, _ -> procesar(documentos) },
+                onError = onError
+            )
+        } else {
+            consulta.get()
+                .addOnSuccessListener { procesar(it) }
+                .addOnFailureListener { onError(it) }
+        }
     }
 
     fun guardar(

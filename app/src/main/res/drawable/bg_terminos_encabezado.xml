@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Encabezado de la ventana de términos: mismo degradado que fondo_home. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="315"
+        android:startColor="#143C8A"
+        android:centerColor="#2A6DB5"
+        android:endColor="#42C8F5" />
+</shape>

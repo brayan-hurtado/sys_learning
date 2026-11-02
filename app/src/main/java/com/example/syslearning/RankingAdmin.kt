@@ -1,5 +1,9 @@
 package com.example.syslearning
 
+import android.content.Context
+import com.example.syslearning.util.LecturaRapida
+import com.example.syslearning.util.Puntuacion
+import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.FirebaseFirestore
 
 object RankingRepository {
@@ -19,11 +23,20 @@ object RankingRepository {
         codigoAula: String? = null,
         soloSinAula: Boolean = false,
         onSuccess: (List<RankingUsuario>) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (Exception) -> Unit,
+        /** Con context, sin internet se usa la copia del dispositivo al instante. */
+        context: Context? = null
     ) {
 
-        db.collection("usuarios")
-            .get()
+        val usuarios = db.collection("usuarios")
+
+        val tarea = if (context != null && !LecturaRapida.hayConexion(context)) {
+            usuarios.get(Source.CACHE)
+        } else {
+            usuarios.get()
+        }
+
+        tarea
             .addOnSuccessListener { resultado ->
 
                 val ranking = resultado.documents
@@ -78,49 +91,46 @@ object RankingRepository {
                             (palabraDelDia?.get("totalGanados") as? Number)
                                 ?.toInt() ?: 0
 
+                        // Micro actividades: dominadas, intentos y XP
+                        // (los escribe SesionActividadesManager).
+                        val actividades = Puntuacion.resumirActividades(
+                            documento.get("actividadesProgreso") as? Map<*, *>
+                        )
+
+                        val xp = (documento.get("xpTotal") as? Number)?.toInt() ?: 0
+
                         //=========================
-                        // PUNTOS
+                        // PUNTOS (reglas en Puntuacion.kt)
                         //=========================
 
-                        val puntosRacha = racha * 15
-
-                        val puntosCursos = cursosCompletados * 100
-
-                        val puntosPalabras = totalGanados * 50
-
-                        val bonusIntentos =
-                            if (totalJugados > 0) {
-
-                                ((7.0 - (totalIntentos.toDouble() / totalJugados)) * 20)
-                                    .coerceAtLeast(0.0)
-                                    .toInt()
-
-                            } else {
-
-                                0
-
-                            }
-
-                        // XP de las micro actividades (lo suma SesionActividadesManager)
-                        val puntosActividades =
-                            (documento.get("xpTotal") as? Number)?.toInt() ?: 0
-
-                        val puntos =
-                            puntosRacha +
-                                    puntosCursos +
-                                    puntosPalabras +
-                                    bonusIntentos +
-                                    puntosActividades
+                        val puntos = Puntuacion.puntos(
+                            cursosCompletados = cursosCompletados,
+                            actividades = actividades,
+                            xpActividades = xp,
+                            rachaPalabra = racha,
+                            palabrasGanadas = totalGanados,
+                            palabrasJugadas = totalJugados,
+                            intentosPalabra = totalIntentos
+                        )
 
                         RankingUsuario(
                             nombre = nombre,
                             racha = racha,
                             cursosCompletados = cursosCompletados,
-                            puntos = puntos
+                            puntos = puntos,
+                            uid = documento.id,
+                            actividadesCompletadas = actividades.completadas,
+                            intentosActividades = actividades.intentos,
+                            precision = actividades.precision,
+                            xp = xp
                         )
 
                     }
-                    .sortedByDescending { it.puntos }
+                    .sortedWith(
+                        compareByDescending<RankingUsuario> { it.puntos }
+                            .thenByDescending { it.actividadesCompletadas }
+                            .thenBy { it.nombre.lowercase() }
+                    )
 
                 onSuccess(ranking)
 

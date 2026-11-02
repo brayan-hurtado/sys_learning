@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Ventana de términos y condiciones que se muestra antes de crear la
+    cuenta (registro.kt). El texto completo está en res/raw/terminos_condiciones.html.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="20dp"
+    android:paddingTop="20dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="12dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Términos y condiciones"
+        android:textColor="@color/tituloCurso"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Lee el documento completo antes de aceptar."
+        android:textColor="@color/sys_text_secondary"
+        android:textSize="13sp" />
+
+    <!-- Texto desplazable de los términos -->
+    <ScrollView
+        android:id="@+id/scrollTerminos"
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        android:layout_marginTop="12dp"
+        android:background="#F5F7FA"
+        android:fadeScrollbars="false"
+        android:padding="12dp"
+        android:scrollbars="vertical">
+
+        <TextView
+            android:id="@+id/tvTextoTerminos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="3dp"
+            android:textColor="@color/sys_text"
+            android:textSize="14sp" />
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/tvAvisoLectura"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Desplázate hasta el final para habilitar las casillas."
+        android:textColor="#B26A00"
+        android:textSize="12sp" />
+
+    <CheckBox
+        android:id="@+id/cbAceptoTerminos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:enabled="false"
+        android:text="He leído y acepto los términos y condiciones de uso de Sys Learning."
+        android:textSize="14sp" />
+
+    <CheckBox
+        android:id="@+id/cbAutorizoDatos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="Autorizo de manera previa, expresa e informada el tratamiento de mis datos personales conforme a la Política de Tratamiento de Datos Personales de Sys Learning."
+        android:textSize="14sp" />
+
+    <!-- Solo se muestra si la fecha de nacimiento indica que es menor de edad -->
+    <CheckBox
+        android:id="@+id/cbAutorizacionRepresentante"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="Soy menor de edad y cuento con la autorización de mi representante legal para registrarme."
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRechazarTerminos"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No acepto"
+            android:textAllCaps="false" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAceptarTerminos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:enabled="false"
+            android:text="Aceptar y crear cuenta"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
+
+</LinearLayout>
